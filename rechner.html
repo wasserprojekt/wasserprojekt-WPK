@@ -484,8 +484,10 @@
               poolBilderContainer.appendChild(poolBild);
             }
 
+const waterFormatted = totalWater.toLocaleString('de-DE');
 
-            document.getElementById('total-water').innerText = totalWater + ' L';
+
+            document.getElementById('total-water').innerText = waterFormatted + ' L';
             document.getElementById('total-pools').innerHTML = 'Das entspricht etwa ' + totalPools + '<span style="font-weight:600;" onclick="shrek(shreko2)"> Pools</span>';
 
             document.getElementById('total-badewannen').innerHTML = '..oder ' + totalBadewannen + '<span style="font-weight:600;" onclick="shrek(shreko1)"> Badewannen.</span>';
