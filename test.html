@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Links und Rechts ausgerichtete Elemente mit Scroll-Animation</title>
+    <style>
+        .mdl-mega-footer--middle-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1000px;
+        }
+        /* Füge einige Stile hinzu, um den Inhalt zu verlängern, damit das Scrollen sichtbar wird */
+        body {
+            height: 2000px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="top"></div>
+    <div class="mdl-mega-footer--middle-section">
+        <p class="mdl-typography--font-light">Leon -- Berivan -- Maxime</p>
+        <a href="#top" id="scrollToTop">Nach oben</a>
+    </div>
+
+    <!-- Ein Element am Anfang der Seite für den Scroll-Anchor -->
+   
+
+    <script>
+        document.getElementById('scrollToTop').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

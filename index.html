@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Introducing Lollipop, a sweet new take on Android.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>Startseite</title>
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #view-source {
+      position: fixed;
+      display: block;
+      right: 0;
+      bottom: 0;
+      margin-right: 40px;
+      margin-bottom: 40px;
+      z-index: 900;
+    }
+
+    .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          visibility: hidden;
+          opacity: 0;
+          transition: visibility 0s, opacity 0.3s;
+          z-index: 1000;
+        }
+
+        /* CSS für das modale Fenster */
+        .modal {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          max-width: 500px;
+          width: 100%;
+          text-align: center;
+          z-index: 1000;
+        }
+
+        /* CSS für die Schaltfläche */
+        .modal button {
+          margin-top: 20px;
+          padding: 10px 20px;
+          border: none;
+          background: #007BFF;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        /* Sichtbares Overlay und modales Fenster */
+        .modal-overlay.visible {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        #modalMessage {
+          padding: 0;
+        }
+  </style>
+</head>
+
+<body>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+
+    <div class="android-header mdl-layout__header mdl-layout__header--waterfall">
+      <div class="mdl-layout__header-row" style=" 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <span class="android-title mdl-layout-title">
+          <h1 style="color: rgb(129, 129, 129); font-size:x-large;">Praktischer Teil WPK - Virtuelles Wasser</h1>
+        </span>
+        <!-- Add spacer, to align navigation to the right in desktop -->
+        <div class="android-header-spacer mdl-layout-spacer"></div>
+        <!-- Navigation -->
+      </div>
+    </div>
+
+    <div class="android-drawer mdl-layout__drawer">
+      <span class="mdl-layout-title">
+        <!--Logo when needed-->
+      </span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="index.html">Startseite</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="rechner.html">Rechner</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="https://drive.google.com/drive/folders/1DcsQXga7SeGH5qe827WzeUK_o5rXZWO1?usp=sharing" target="_blank">Präsentation</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="quellen.html">Quellen</a>
+      </nav>
+    </div>
+
+    <div class="android-content mdl-layout__content">
+
+
+      <div id="top"></div>
+
+      <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+          <p id="modalMessage"></p>
+          <div style="text-align: start;">
+            <a id="modalQuelle" style="font-size: 10px; color: #0073e6; text-decoration: none;" href="quellen.html"></a>
+          </div>
+
+          <button onclick="schliesseCustomAlert()">Schließen</button>
+        </div>
+      </div>
+
+      <div class="android-be-together-section mdl-typography--text-center">
+        <div class="logo-font android-slogan" style="color: white;">Virtuelles Wasser</div>
+        <div class="logo-font android-sub-slogan" style="color: white;">Der unsichtbare Wasserverbrauch unserer Produkte</div>
+      </div>
+
+
+      <div style="
+          padding: 24px;
+        ">
+        <h1 style="
+            color: #848484;
+            font-size: 28px;
+          ">Was ist Virtuelles Wasser?</h1>
+
+        <p style="color: #333; font-size: 18px;">
+          Virtuelles Wasser ist Wasser, welches bei der Herstellung und dem Transport von Produkten indirekt verbraucht wird. Es umfasst nicht nur das Wasser, welches sichtbar in Produkten enthalten ist, sondern auch das Wasser, das während der Produktion verwendet wurde.
+        </p>
+        <div style="height: 1px; background-color: #d8d8d8; margin-top: 40px; "></div>
+
+      </div>
+
+
+      <div class="android-screen-section mdl-typography--text-center">
+        <a name="screens"></a>
+        <div class="mdl-typography--display-1-color-contsrast" style="margin-bottom: 60px; margin-top:-20px; color: #333;">Virtueller Wasserverbrauch verschiedener Dinge</div>
+        <div class="android-screens">
+
+          <div class="android-wear android-screen">
+
+            <img class="android-screen-image" src="images/jeans (2).png" style="width: 128px;">
+
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Jeans</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Eine Jeans hat einen virtuellen Wasserverbrauch von ca. 7250L', 5)">7250L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+
+            <img class="android-screen-image" src="images/iphone.png" style="width: 128px;">
+
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Handy</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Ein Smartphone hat einen virtuellen Wasserverbrauch von ca. 13.000L', 8)">13.000L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+
+            <img class="android-screen-image" src="images/apfel.png" style="width: 128px;">
+
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Apfel</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href=""  onclick="zeigeCustomAlert('Ein Apfel hat einen virtuellen Wasserverbrauch von ca. 125L', 9)">125L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+
+            <img class="android-screen-image" src="images/wagen.png" style="width: 128px;">
+
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Auto</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Ein Auto hat einen virtuellen Wasserverbrauch von ca. 400.000L', 9)">400.000L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+            <img class="android-screen-image" src="images/schokolade.png" style="width: 128px;">
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Schokoladentafel</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Eine Tafel Schokolade hat einen virtuellen Wasserverbrauch von ca. 1720L', 9)">1720L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+            <img class="android-screen-image" src="images/pizza.png" style="width: 128px;">
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Pizza</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Eine Pizza hat einen virtuellen Wasserverbrauch von ca. 1720L', 11)">1720L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+            <img class="android-screen-image" src="images/ei.png" style="width: 128px;" style="width: 128px;">
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Ei</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Ein Ei hat einen virtuellen Wasserverbrauch von ca. 200L', 9)">200L</p>
+          </div>
+
+          <div class="android-wear android-screen">
+            <img class="android-screen-image" src="images/kaffee.png" style="width: 128px;">
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Tasse Kaffe</p>
+            <p class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="" onclick="zeigeCustomAlert('Ein Tasse Kaffee hat einen virtuellen Wasserverbrauch von ca. 132L', 10)">132L</p>
+          </div>
+
+        </div>
+      </div>
+
+
+      <div class="android-wear-section">
+        <div class="android-wear-band">
+          <div class="android-wear-band-text">
+            <div class="mdl-typography--display-2 " style="margin-top: 20px; margin-bottom: 26px; color: #333; font-size: 32px;">Wasserverbrauch der Textilindustrie</div>
+            <p class="mdl-typography--headline " style="font-size: 18px; color: #848484;">
+              Die Textilindustrie benötigt für die Produktion von Kleidung sehr viel Wasser. Dieses wird hauptsächlich zum Anbau von Baumwolle und bei der Behandlung der Kleidung mit Chemikalien benötigt, wobei es verschmutzt und so ungebräuchlich wird.
+            </p>
+
+            <div style="height: 1px; background-color: #d8d8d8; margin-top: 20px; margin-bottom: 20px;"></div>
+
+            <h1 style="font-size: 26px; color: #333;">Wie kann man den virtuellen Wasseverbrauch seiner Kleidung senken?</h1>
+            <p class="mdl-typography--headline " style="font-size: 18px; color: #848484;">
+
+            <ul style=" font-size: 18px; color: #848484;">
+              <li>Gebrauchte Kleidung kaufen</li>
+              <li>Nachhaltige und umweltfreundliche Kleidung tragen</li>
+              <li>Kleidung länger nutzen und besser pflegen</li>
+            </ul>
+            </p style="font-size: 28px;">
+
+            <div style="height: 1px; background-color: #d8d8d8; margin-top: 20px; margin-bottom: 20px;"></div>
+
+            <p class="mdl-typography--headline " style="font-size: 18px; color: #848484;">
+              Mit dem Rechner kannst du herausfinden, wie viel Wasser in deinem Kleiderschrank steckt.
+            </p>
+
+            <p>
+              <a class="mdl-typography--font-regular mdl-typography--text-uppercase android-alt-link" href="rechner.html">
+                HERAUSFINDEN&nbsp;<i class="material-icons">chevron_right</i>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+
+      <footer class="android-footer mdl-mega-footer">
+        <div class="mdl-mega-footer--top-section">
+          <div class="mdl-mega-footer--right-section">
+
+          </div>
+        </div>
+
+        <div style="display: flex;  justify-content:space-between">
+          <p class="mdl-typography--font-light ">Leon -- Berivan -- Maxime <a href="quellen.html" style="color: #848484; padding-left: 30px;">Quellen</a></p>
+          
+          <a href="#top" style="text-decoration: none;
+            color: #848484;" id="scrollToTop">Nach oben ▲</a>
+        </div>
+      </footer>
+
+
+    </div>
+
+    <script>
+      document.getElementById('scrollToTop').addEventListener('click', function (event) {
+        event.preventDefault();
+        document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      function zeigeCustomAlert(value1, value2) {
+
+        document.getElementById('modalMessage').innerText = value1
+        document.getElementById('modalQuelle').innerText = "Quelle " + value2
+        // Zeige das Overlay und das modale Fenster
+        document.getElementById('modalOverlay').classList.add('visible');
+      }
+
+      function schliesseCustomAlert() {
+        // Verberge das Overlay und das modale Fenster
+        document.getElementById('modalOverlay').classList.remove('visible');
+      }
+    </script>
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</body>
+
+</html>

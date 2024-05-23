@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Introducing Lollipop, a sweet new take on Android.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>Rechner</title>
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #view-source {
+      position: fixed;
+      display: block;
+      right: 0;
+      bottom: 0;
+      margin-right: 40px;
+      margin-bottom: 40px;
+      z-index: 900;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <div class="android-header mdl-layout__header mdl-layout__header--waterfall" style=" 
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <div class="mdl-layout__header-row">
+        <span class="android-title mdl-layout-title">
+          <h1 style="color: rgb(129, 129, 129); font-size:x-large;">Wasser-Rechner</h1>
+        </span>
+        <!-- Add spacer, to align navigation to the right in desktop -->
+        <div class="android-header-spacer mdl-layout-spacer"></div>
+        <!-- Navigation -->
+      </div>
+    </div>
+
+    <div class="android-drawer mdl-layout__drawer">
+      <span class="mdl-layout-title">
+        <!--Logo when needed-->
+      </span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="index.html">Startseite</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="rechner.html">Rechner</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="https://drive.google.com/drive/folders/1DcsQXga7SeGH5qe827WzeUK_o5rXZWO1?usp=sharing" target="_blank">Präsentation</a>
+        <div class="android-drawer-separator"></div>
+        <a class="mdl-navigation__link" href="quellen.html">Quellen</a>
+      </nav>
+    </div>
+
+    <div class="android-content mdl-layout__content" style="padding: 20px;">
+
+      <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+          <p id="modalMessage"></p>
+          <div style="text-align: start;">
+            <a id="modalQuelle" style="font-size: 10px; color: #0073e6; text-decoration: none;" href="quellen.html"></a>
+          </div>
+
+          <button onclick="schliesseCustomAlert()">Schließen</button>
+        </div>
+      </div>
+
+
+
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          background-color: rgb(245, 245, 245);
+          margin: 0;
+          padding: 0;
+        }
+
+        .container {
+          max-width: 800px;
+          margin: 50px auto;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          visibility: hidden;
+          opacity: 0;
+          transition: visibility 0s, opacity 0.3s;
+          z-index: 1000;
+        }
+
+        /* CSS für das modale Fenster */
+        .modal {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          max-width: 500px;
+          width: 100%;
+          text-align: center;
+          z-index: 1000;
+        }
+
+        /* CSS für die Schaltfläche */
+        .modal button {
+          margin-top: 20px;
+          padding: 10px 20px;
+          border: none;
+          background: #007BFF;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        /* Sichtbares Overlay und modales Fenster */
+        .modal-overlay.visible {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        #modalMessage {
+          padding: 0;
+        }
+
+        h1 {
+          text-align: center;
+          color: #333;
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 7px;
+        }
+
+        .seconditem {
+          background-color: rgb(245, 245, 245);
+          border-radius: 12px;
+        }
+
+        label {
+          font-weight: bold;
+          color: #333;
+        }
+
+        .input-group {
+          display: flex;
+          align-items: center;
+        }
+
+        button[type="button"] {
+          padding: 5px 10px;
+          background-color: #0073e6;
+          color: #fff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+
+        button[type="button"]:hover {
+          background-color: #005bb5;
+        }
+
+        input[type="number"] {
+          width: 60px;
+          text-align: center;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          margin: 0 10px;
+        }
+
+        button[type="submit"] {
+          padding: 10px 20px;
+          background-color: #0073e6;
+          color: #fff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+
+        }
+
+        button[type="submit"]:hover {
+          background-color: #005bb5;
+        }
+
+        #result {
+          margin-top: 20px;
+          text-align: center;
+        }
+
+        #total-water {
+          font-size: 64px;
+          background: url('background-image.jpg') repeat;
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          font-weight: 900;
+          padding: 14px;
+        }
+
+        #total-pools,
+        #total-badewannen {
+          font-size: 24px;
+          color: #0073e6;
+        }
+
+        #pool-bilder {
+          text-align: start;
+        }
+
+        #pool-bilder img {
+          width: 80px;
+          margin-right: 10px;
+          margin-bottom: 10px;
+        }
+
+        #form-div {
+          max-height: 260px;
+          overflow: hidden;
+          overflow-y: scroll;
+          padding: 10px;
+        }
+
+        .clothing-img {
+          width: 22px;
+        }
+      </style>
+
+
+      <div class="container">
+
+        <h1 style="font-size: 34px;">Berechne den virtuellen Wasserverbrauch deines Kleiderschranks</h1>
+
+        <div id="form-div">
+          <form id="water-consumption-form">
+
+            <div class="item">
+              <label for="tshirts" onclick="zeigeCustomAlert('tshirtsWater', 'Ein T-Shirt aus Baumwolle hat einen virtuellen Wasserverbrauch von ca. ', 1)">T-Shirts / Hemden <img src="shirt.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('tshirts')">-</button>
+                <input type="number" id="tshirts" name="tshirts" min="0" value="0" readonly>
+                <button type="button" onclick="increment('tshirts')">+</button>
+              </div>
+            </div>
+
+            <div class="item seconditem">
+              <label for="jeans" onclick="zeigeCustomAlert('jeansWater', 'Eine Jeans aus Baumwolle hat einen virtuellen Wasserverbrauch von ca. ', 5)">Jeans <img src="jeans.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('jeans')">-</button>
+                <input type="number" id="jeans" name="jeans" min="0" value="0" readonly>
+                <button type="button" onclick="increment('jeans')">+</button>
+              </div>
+
+            </div>
+
+            <div class="item">
+              <label for="shoes" onclick="zeigeCustomAlert('shoesWater', 'Ein Paar Sneaker (nicht aus Lerder) hat einen virtuellen Wasserverbrauch von ca. ', 2)">Sneaker <img src="sneaker.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('shoes')">-</button>
+                <input type="number" id="shoes" name="shoes" min="0" value="0" readonly>
+                <button type="button" onclick="increment('shoes')">+</button>
+              </div>
+            </div>
+
+            <div class="item seconditem">
+              <label for="jackets" onclick="zeigeCustomAlert('jacketsWater', 'Ein Jacke aus Polyester hat einen virtuellen Wasserverbrauch von ca. ', 2)">Jacken <img src="jacke.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('jackets')">-</button>
+                <input type="number" id="jackets" name="jackets" min="0" value="0" readonly>
+                <button type="button" onclick="increment('jackets')">+</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <label for="lederhosen" onclick="zeigeCustomAlert('lederhosenWater', 'Eine Lederhose hat einen virtuellen Wasserverbrauch von ca. ', 6)">Leder-Hosen <img src="lederhose.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('lederhosen')">-</button>
+                <input type="number" id="lederhosen" name="lederhosen" min="0" value="0" readonly>
+                <button type="button" onclick="increment('lederhosen')">+</button>
+              </div>
+            </div>
+
+            <div class="item seconditem">
+              <label for="lederschuhe" onclick="zeigeCustomAlert('lederschuheWater', 'Ein Paar Leder Schuhe het einen virtuellen Wasserverbrauch von ca. ', 3)">Leder-Schuhe <img src="lederschuhe.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('lederschuhe')">-</button>
+                <input type="number" id="lederschuhe" name="lederschuhe" min="0" value="0" readonly>
+                <button type="button" onclick="increment('lederschuhe')">+</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <label for="socken" onclick="zeigeCustomAlert('sockenWater', 'Ein Paar Socken hat einen virtuellen Wasserverbrauch von ca. ', 5)">Socken <img src="socken.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('socken')">-</button>
+                <input type="number" id="socken" name="socken" min="0" value="0" readonly>
+                <button type="button" onclick="increment('socken')">+</button>
+              </div>
+            </div>
+
+            <div class="item seconditem">
+              <label for="pullover" onclick="zeigeCustomAlert('pulloverWater', 'Ein Pullover aus Baumwolle hat einen virtuellen Wasserverbrauch von ca. ', 4)">Pullover <img src="pullover.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('pullover')">-</button>
+                <input type="number" id="pullover" name="pullover" min="0" value="0" readonly>
+                <button type="button" onclick="increment('pullover')">+</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <label for="kurzehosen" onclick="zeigeCustomAlert('kurzehosenWater', 'Eine kurze Hose aus Baumwolle hat einen virtuellen Wasserverbrauch von ca. ', 2)">kurze Hosen <img src="kurze-hose.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('kurzehosen')">-</button>
+                <input type="number" id="kurzehosen" name="kurzehosen" min="0" value="0" readonly>
+                <button type="button" onclick="increment('kurzehosen')">+</button>
+              </div>
+            </div>
+
+            <div class="item seconditem">
+              <label for="handtschen" onclick="zeigeCustomAlert('handtaschenWater', 'Eine Handtasche aus Leder hat einen virtuellen Wasserverbrauch von ca. ', 6)">Leder Handtaschen <img src="tasche.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('handtaschen')">-</button>
+                <input type="number" id="handtaschen" name="kurzehosen" min="0" value="0" readonly>
+                <button type="button" onclick="increment('handtaschen')">+</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <label for="lederjacken" onclick="zeigeCustomAlert('lederjackenWater', 'Eine Lederjacke hat einen virtuellen Wasserverbrauch von ca. ', 7)">Lederjacken <img src="lederjacke.png" alt="" class="clothing-img"></label>
+              <div class="input-group">
+                <button type="button" onclick="decrement('lederjacken')">-</button>
+                <input type="number" id="lederjacken" name="lederjacken" min="0" value="0" readonly>
+                <button type="button" onclick="increment('lederjacken')">+</button>
+              </div>
+            </div>
+
+
+          </form>
+
+        </div>
+
+        <button type="button" onclick="calculateWaterConsumption()" style="padding: 10px; width: 100%; margin-top: 20px;">Berechnen</button>
+
+        <div id="result" style="display: none;">
+          <h2 style="font-size: 30px;">Gesamter virtueller Wasserverbrauch: <span onclick="alert('Der Wasserverbrauch kann durch verschiedene Größen, Produktionsprozesse, etc. abweichen.')">*</span></h2>
+          <div style="max-width: 800px;
+          margin: 50px auto;
+          text-align: center;">
+            <p id="total-water">0 L</p>
+          </div>
+
+          <div style="text-align: start;">
+            <p id="total-pools"></p>
+            <div id="pool-bilder"></div>
+            <p id="total-badewannen"></p>
+          </div>
+
+
+
+        </div>
+
+      </div>
+
+      <script>
+        var shreko1 = 'Bei 200L / Badewanne'
+        var shreko2 = 'Bei 10.000L / Pool'
+
+
+
+        const tshirtsWater = 2500; //Quelle 1   https://www.eskp.de/klimawandel/2495-liter-wasser-zur-herstellung-eines-t-shirts-935646/
+        const jeansWater = 7250; //Quelle 5   https://sustainabilitymag.com/supply-chain-sustainability/how-much-water-do-you-wear-asks-gap
+        const shoesWater = 4000; //Gemini (keine Quelle)
+        const jacketsWater = 4000;  //Gemini (keine Quelle)
+        const lederhosenWater = 13600; //Quelle 6   selber gerechnet   17.000L / L   https://circumfauna.org/leather-water-footprint#:~:text=The%20water%20footprint%20of%20raising,water%20per%20kg%20of%20leather.&text=The%20average%20American%20shower%20uses,length%20is%20about%20five%20minutes.
+        const lederschuheWater = 8000; //Quelle 3   https://www.zdf.de/nachrichten/wirtschaft/sneaker-hype-umwelt-nachhaltigkeit-100.html
+        const sockenWater = 375; //Quelle 5   https://sustainabilitymag.com/supply-chain-sustainability/how-much-water-do-you-wear-asks-gap
+        const pulloverWater = 4400; //Quelle 4   https://klassewasser.de/content/language1/html/9252.php
+        const kurzehosenWater = 2000;  //Gemini (keine Quelle)   
+        const handtaschenWater = 15000   //Quelle 6 https://circumfauna.org/leather-water-footprint#:~:text=The%20water%20footprint%20of%20raising,water%20per%20kg%20of%20leather.&text=The%20average%20American%20shower%20uses,length%20is%20about%20five%20minutes.
+        const lederjackenWater = 26000   //Quelle 7 https://www.latimes.com/archives/la-xpm-2010-mar-13-la-hm-realist-20100313-story.html#:~:text=All%20of%20it%20is%20enormously,made%20from%20water%2Dhogging%20cotton.
+
+        function zeigeCustomAlert(value1, value2, value3) {
+
+          wasserverbrauchDerKleidung = eval(value1)
+
+          document.getElementById('modalMessage').innerText = value2 + wasserverbrauchDerKleidung + "L";
+          document.getElementById('modalQuelle').innerText = "Quelle " + value3
+          // Zeige das Overlay und das modale Fenster
+          document.getElementById('modalOverlay').classList.add('visible');
+        }
+
+        function schliesseCustomAlert() {
+          // Verberge das Overlay und das modale Fenster
+          document.getElementById('modalOverlay').classList.remove('visible');
+        }
+
+        function shrek(value) {
+          alert(value)
+        }
+
+        function increment(id) {
+          const input = document.getElementById(id);
+          input.value = parseInt(input.value) + 1;
+        }
+
+        function decrement(id) {
+          const input = document.getElementById(id);
+          if (input.value > 0) {
+            input.value = parseInt(input.value) - 1;
+          }
+        }
+
+
+        function calculateWaterConsumption() {
+          const tshirts = document.getElementById('tshirts').value;
+          const jeans = document.getElementById('jeans').value;
+          const shoes = document.getElementById('shoes').value;
+          const jackets = document.getElementById('jackets').value;
+          const lederhosen = document.getElementById('lederhosen').value;
+          const lederschuhe = document.getElementById('lederschuhe').value;
+          const socken = document.getElementById('socken').value;
+          const pullover = document.getElementById('pullover').value;
+          const kurzehosen = document.getElementById('kurzehosen').value;
+          const handtaschen = document.getElementById('handtaschen').value;
+          const lederjacken = document.getElementById('lederjacken').value;
+
+
+
+          const totalWater =
+            (tshirts * tshirtsWater) +
+            (jeans * jeansWater) +
+            (shoes * shoesWater) +
+            (jackets * jacketsWater) +
+            (lederhosen * lederhosenWater) +
+            (lederschuhe * lederschuheWater) +
+            (socken * sockenWater) +
+            (pullover * pulloverWater) +
+            (kurzehosen * kurzehosenWater) +
+            (handtaschen * handtaschenWater) +
+            (lederjacken * lederjackenWater);
+
+          if (totalWater == 0) {
+            alert("Keine Kleidung ausgewählt!")
+
+          } else {
+            const poolVolume = 10000; // 50 m³ = 50000 Liter
+            const badewannenVolume = 200
+
+            const totalPools = Math.round(totalWater / poolVolume)
+            const totalBadewannen = Math.round(totalWater / badewannenVolume)
+
+
+            var poolBilderContainer = document.getElementById("pool-bilder");
+            poolBilderContainer.innerHTML = ""; // Lösche vorherige Bilder
+
+            for (var i = 0; i < totalPools; i++) {
+              var poolBild = document.createElement("img");
+              poolBild.src = "aufblasbarer-pool.png"; // Pfad zum Pool-Bild
+              poolBild.alt = "Swimmingpool";
+              poolBilderContainer.appendChild(poolBild);
+            }
+
+
+            document.getElementById('total-water').innerText = totalWater + ' L';
+            document.getElementById('total-pools').innerHTML = 'Das entspricht etwa ' + totalPools + '<span style="font-weight:600;" onclick="shrek(shreko2)"> Pools</span>';
+
+            document.getElementById('total-badewannen').innerHTML = '..oder ' + totalBadewannen + '<span style="font-weight:600;" onclick="shrek(shreko1)"> Badewannen.</span>';
+
+
+
+
+
+            document.getElementById('result').style.display = 'block';
+
+          }
+
+
+        }
+      </script>
+
+
+      <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</body>
+
+</html>
