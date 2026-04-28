@@ -1,1 +1,350 @@
-v
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  #app{
+    font-family:'Courier Prime','Courier New',monospace;
+    background:#18110a;
+    color:#c8a87a;
+    min-height:580px;
+    position:relative;
+    overflow:hidden;
+    border-radius:8px;
+  }
+  #grain{position:absolute;inset:0;opacity:.3;pointer-events:none;z-index:10;border-radius:8px;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E");
+  }
+  #scan{position:absolute;inset:0;pointer-events:none;z-index:11;border-radius:8px;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);
+  }
+  .flash-ov{position:absolute;inset:0;pointer-events:none;z-index:20;opacity:0;border-radius:8px;background:rgba(220,185,100,.06)}
+  .flash-ov.go{animation:fls .5s ease}
+  @keyframes fls{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+  /* HEADER */
+  .hdr{text-align:center;padding:18px 16px 14px;border-bottom:2px solid #3d2a12;position:relative;z-index:5}
+  .hdr-icon{font-size:22px;margin-bottom:4px}
+  .hdr h1{font-family:'Special Elite',monospace;font-size:clamp(12px,2.2vw,17px);letter-spacing:clamp(1px,0.5vw,3px);text-transform:uppercase;color:#ddb96a;line-height:1.4}
+  .hdr p{font-size:clamp(9px,1.5vw,11px);color:#7a5a30;letter-spacing:2px;margin-top:3px}
+
+  /* LAYOUT — responsive grid */
+  .layout{display:grid;grid-template-columns:1fr 200px;grid-template-rows:auto;position:relative;z-index:5}
+  @media(max-width:640px){.layout{grid-template-columns:1fr;grid-template-rows:auto auto}}
+
+  /* LEFT: drum + controls */
+  .left{padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;border-right:2px solid #2a1c0a}
+  @media(max-width:640px){.left{border-right:none;border-bottom:2px solid #2a1c0a;padding:16px}}
+
+  .drum-wrap{position:relative;width:clamp(140px,30vw,180px);height:clamp(140px,30vw,180px)}
+  .drum{
+    width:100%;height:100%;border-radius:50%;
+    border:4px solid #7a5a2a;
+    background:radial-gradient(circle at 35% 35%,#281c0c,#0c0804);
+    box-shadow:inset 0 0 30px rgba(0,0,0,.8),0 0 0 1px #3a2510,0 4px 20px rgba(0,0,0,.6);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .drum.spin{animation:drm 2.8s cubic-bezier(.25,.46,.45,.94) forwards}
+  @keyframes drm{0%{transform:rotate(0)}40%{transform:rotate(360deg)}75%{transform:rotate(680deg)}100%{transform:rotate(720deg)}}
+  .drum-in{
+    width:65%;height:65%;border-radius:50%;
+    border:2px solid #4a3018;
+    background:radial-gradient(circle at 40% 40%,#1a1006,#08060202);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;
+  }
+  .dnum{font-family:'Special Elite',monospace;font-size:clamp(28px,6vw,44px);color:#ddb96a;text-shadow:0 0 18px rgba(221,185,106,.4);line-height:1;transition:opacity .2s}
+  .dnum.fl{animation:nfl .1s ease infinite}
+  @keyframes nfl{0%,100%{opacity:1}50%{opacity:.2}}
+  .dlabel{font-size:8px;color:#4a3018;letter-spacing:2px;margin-top:2px}
+  .drum-shine{position:absolute;top:14%;left:20%;width:35%;height:25%;border-radius:50%;background:radial-gradient(ellipse,rgba(255,255,255,.05),transparent);pointer-events:none}
+
+  .info-box{background:#0c0904;border:2px solid #2a1c0a;border-radius:3px;padding:10px 16px;text-align:center;width:100%;max-width:240px}
+  .info-box .lbl{font-size:8px;letter-spacing:2px;color:#4a3018;text-transform:uppercase;margin-bottom:4px}
+  .info-box .val{font-family:'Special Elite',monospace;font-size:clamp(16px,3.5vw,22px);color:#ddb96a;letter-spacing:2px}
+  .info-box .sub{font-size:10px;color:#7a5a30;margin-top:3px}
+
+  .ctrls{display:flex;flex-direction:column;gap:8px;width:100%;max-width:240px}
+  .ctr-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  .cnt-box{background:#0c0904;border:1px solid #201408;border-radius:3px;padding:8px;text-align:center}
+  .cnt-n{font-family:'Special Elite',monospace;font-size:clamp(20px,4vw,26px);color:#c4954a}
+  .cnt-l{font-size:8px;color:#3a2510;letter-spacing:1px}
+
+  btn,.btn{display:block;width:100%;font-family:'Courier Prime',monospace;font-size:clamp(9px,1.8vw,12px);letter-spacing:2px;text-transform:uppercase;border:2px solid;padding:9px 12px;cursor:pointer;background:transparent;transition:all .15s;border-radius:2px;text-align:center}
+  .btn-main{border-color:#c4954a;color:#c4954a}
+  .btn-main:hover:not(:disabled){background:#c4954a;color:#0c0904}
+  .btn-main:disabled{opacity:.35;cursor:not-allowed}
+  .btn-sec{border-color:#3a2510;color:#6a4a28;font-size:clamp(8px,1.5vw,10px);padding:7px 10px}
+  .btn-sec:hover:not(:disabled){border-color:#7a5a30;color:#9a7a50}
+  .btn-sec:disabled{opacity:.3;cursor:not-allowed}
+
+  /* RIGHT: results */
+  .right{padding:16px 14px;background:#0c0803;overflow-y:auto;max-height:500px}
+  @media(max-width:640px){.right{max-height:220px;border-top:none}}
+  .rtitle{font-size:8px;letter-spacing:3px;color:#4a3018;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1a1208}
+  .rentry{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(26,18,8,.8);animation:eslide .3s ease}
+  @keyframes eslide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  .rentry.new{background:rgba(196,149,74,.07);border-radius:2px}
+  .eord{font-size:10px;color:#3a2510;min-width:28px}
+  .enum{font-family:'Special Elite',monospace;font-size:13px;color:#ddb96a;min-width:36px;text-align:center}
+  .edate{font-size:10px;color:#7a5a30;flex:1;text-align:right}
+
+  /* FOOTER */
+  .foot{display:flex;justify-content:space-between;align-items:center;padding:7px 16px;background:#090602;border-top:1px solid #1a1208;position:relative;z-index:5;flex-wrap:wrap;gap:6px}
+  .sdot{width:6px;height:6px;border-radius:50%;background:#3a2510;display:inline-block;margin-right:5px;vertical-align:middle}
+  .sdot.on{background:#c4954a;animation:blink 1s ease infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .stxt{font-size:9px;color:#4a3018;letter-spacing:1px}
+  .prog{display:flex;align-items:center;gap:8px}
+  .pbar{height:3px;background:#181008;border-radius:2px;overflow:hidden;width:clamp(60px,15vw,120px)}
+  .pfill{height:100%;background:#c4954a;transition:width .4s ease;border-radius:2px}
+
+  /* TICKER */
+  .ticker{padding:7px 0;background:#080502;border-top:1px solid #1a1208;overflow:hidden;position:relative;z-index:5}
+  .ticin{display:flex;gap:40px;white-space:nowrap;font-size:9px;color:#4a3018;letter-spacing:1px;animation:tick 35s linear infinite}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  .done-msg{text-align:center;padding:14px;font-family:'Special Elite',monospace;color:#c4954a;font-size:13px;letter-spacing:2px;border:1px solid #2a1c0a;border-radius:2px;margin-top:8px}
+</style>
+
+<div id="app">
+  <div id="grain"></div><div id="scan"></div>
+  <div class="flash-ov" id="flov"></div>
+
+  <div class="hdr">
+    <div class="hdr-icon">⚖</div>
+    <h1>Selective Service System — National Draft Lottery</h1>
+    <p>Washington D.C. — July 1, 1970 &nbsp;|&nbsp; Offizielles Ziehungsprotokoll</p>
+  </div>
+
+  <div class="layout">
+    <div class="left">
+      <div class="drum-wrap">
+        <div class="drum" id="drum">
+          <div class="drum-in">
+            <div class="dnum" id="dnum">—</div>
+            <div class="dlabel">LOSNUMMER</div>
+          </div>
+          <div class="drum-shine"></div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="lbl">Gezogenes Datum</div>
+        <div class="val" id="ddate">— — —</div>
+        <div class="sub" id="dseq">&nbsp;</div>
+      </div>
+
+      <div class="ctrls">
+        <div class="ctr-row">
+          <div class="cnt-box"><div class="cnt-n" id="cntN">0</div><div class="cnt-l">Gezogen</div></div>
+          <div class="cnt-box"><div class="cnt-n" id="cntR">366</div><div class="cnt-l">Verbleibend</div></div>
+        </div>
+        <button class="btn btn-main" id="btnDraw" onclick="drawOne()">▶ Kapsel ziehen</button>
+        <div class="ctr-row">
+          <button class="btn btn-sec" id="btnAuto" onclick="toggleAuto()">⟳ Auto</button>
+          <button class="btn btn-sec" onclick="resetAll()">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="right" id="rightPanel">
+      <div class="rtitle">● Ziehungsprotokoll 1970</div>
+      <div id="rlist"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">Bereit zur Ziehung</span></div>
+    <div class="prog">
+      <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      <span class="stxt" id="ppct">0 / 366</span>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticin">
+      <span>SELECTIVE SERVICE ACT 1970 — CONGRESSIONAL RECORD — DRAFT LOTTERY — 366 KAPSELN — GEBURTSDATEN 1951 — JAHRGANG 1951 — ALLE MÄNNER — OFFIZIELLES PROTOKOLL — SELECTIVE SERVICE —</span>
+      <span>SELECTIVE SERVICE ACT 1970 — CONGRESSIONAL RECORD — DRAFT LOTTERY — 366 KAPSELN — GEBURTSDATEN 1951 — JAHRGANG 1951 — ALLE MÄNNER — OFFIZIELLES PROTOKOLL — SELECTIVE SERVICE —</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ECHTE DATEN: 1970 Random Selection Sequence ──
+// Zeile = Tag (1-31), Spalte = Monat (Jan-Dez)
+// Quelle: Selective Service System, July 1, 1970
+const RAW = [
+  [305,86,108,32,330,249,93,111,225,359,19,129],
+  [159,144,29,271,298,228,350,45,161,125,34,328],
+  [251,297,267,83,40,301,115,261,49,244,348,157],
+  [215,210,275,81,276,20,279,145,232,202,266,165],
+  [101,214,293,269,364,28,188,54,82,24,310,56],
+  [224,347,139,253,155,110,327,114,6,87,76,10],
+  [306,91,122,147,35,85,50,168,8,234,51,12],
+  [199,181,213,312,321,366,13,48,184,283,97,105],
+  [194,338,317,219,197,335,277,106,263,342,80,43],
+  [325,216,323,218,65,206,284,21,71,220,282,41],
+  [329,150,136,14,37,134,248,324,158,237,46,39],
+  [221,68,300,346,133,272,15,142,242,72,66,314],
+  [318,152,259,124,295,69,42,307,175,138,126,163],
+  [238,4,354,231,178,356,331,198,1,294,127,26],
+  [17,89,169,273,130,180,322,102,113,171,131,320],
+  [121,212,166,148,55,274,120,44,207,254,107,96],
+  [235,189,33,260,112,73,98,154,255,288,143,304],
+  [140,292,332,90,278,341,190,141,246,5,146,128],
+  [58,25,200,336,75,104,227,311,177,241,203,240],
+  [280,302,239,345,183,360,187,344,63,192,185,135],
+  [186,363,334,62,250,60,27,291,204,243,156,70],
+  [337,290,265,316,326,247,153,339,160,117,9,53],
+  [118,57,256,252,319,109,172,116,119,201,182,162],
+  [59,236,258,2,31,358,23,36,195,196,230,95],
+  [52,179,343,351,361,137,67,286,149,176,132,84],
+  [92,365,170,340,357,22,303,245,18,7,309,173],
+  [355,205,268,74,296,64,289,352,233,264,47,78],
+  [77,299,223,262,308,222,88,167,257,94,281,123],
+  [349,285,362,191,226,353,270,61,151,229,99,16],
+  [164,null,217,208,103,209,287,333,315,38,174,3],
+  [211,null,30,null,313,null,193,11,null,79,null,100]
+];
+const MONTHS=['JAN','FEB','MÄR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DEZ'];
+const MDAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+
+// Baue Pool mit echten Losnummern
+function buildPool(){
+  const pool=[];
+  for(let m=0;m<12;m++){
+    for(let d=0;d<MDAYS[m];d++){
+      const num=RAW[d][m];
+      if(num!=null){
+        pool.push({lotteryNum:num,month:m,day:d+1,label:`${String(d+1).padStart(2,'0')} ${MONTHS[m]}`});
+      }
+    }
+  }
+  // Sortiere nach Losnummer für sequentielle Ziehung (1,2,3,...)
+  pool.sort((a,b)=>a.lotteryNum-b.lotteryNum);
+  return pool;
+}
+
+let allEntries=buildPool(); // geordnet 1..366
+let nextIdx=0;
+let autoInt=null;
+let drawing=false;
+
+function resetAll(){
+  if(autoInt){clearInterval(autoInt);autoInt=null;}
+  nextIdx=0;drawing=false;
+  document.getElementById('dnum').textContent='—';
+  document.getElementById('dnum').classList.remove('fl');
+  document.getElementById('ddate').textContent='— — —';
+  document.getElementById('dseq').innerHTML='&nbsp;';
+  document.getElementById('rlist').innerHTML='';
+  document.getElementById('cntN').textContent='0';
+  document.getElementById('cntR').textContent='366';
+  document.getElementById('pfill').style.width='0%';
+  document.getElementById('ppct').textContent='0 / 366';
+  document.getElementById('btnDraw').disabled=false;
+  document.getElementById('btnAuto').disabled=false;
+  document.getElementById('btnAuto').textContent='⟳ Auto';
+  document.getElementById('sdot').classList.remove('on');
+  document.getElementById('stxt').textContent='Bereit zur Ziehung';
+  document.getElementById('drum').classList.remove('spin');
+}
+
+function drawOne(){
+  if(nextIdx>=366||drawing)return;
+  drawing=true;
+  document.getElementById('btnDraw').disabled=true;
+
+  const entry=allEntries[nextIdx];
+  nextIdx++;
+
+  document.getElementById('sdot').classList.add('on');
+  document.getElementById('stxt').textContent='Ziehung läuft…';
+
+  const drum=document.getElementById('drum');
+  const dn=document.getElementById('dnum');
+  drum.classList.remove('spin');
+  void drum.offsetWidth;
+  drum.classList.add('spin');
+  dn.classList.add('fl');
+
+  let fc=0;
+  const fi=setInterval(()=>{
+    dn.textContent=Math.floor(Math.random()*366)+1;
+    fc++;
+    if(fc>22){
+      clearInterval(fi);
+      dn.textContent=entry.lotteryNum;
+      dn.classList.remove('fl');
+      document.getElementById('ddate').textContent=entry.label;
+      document.getElementById('dseq').textContent=`Losnummer ${entry.lotteryNum} von 366`;
+
+      // Flash
+      const flov=document.getElementById('flov');
+      flov.classList.remove('go');void flov.offsetWidth;flov.classList.add('go');
+
+      addEntry(entry);
+
+      const done=nextIdx;
+      const rem=366-done;
+      const pct=Math.round((done/366)*100);
+      document.getElementById('cntN').textContent=done;
+      document.getElementById('cntR').textContent=rem;
+      document.getElementById('pfill').style.width=pct+'%';
+      document.getElementById('ppct').textContent=`${done} / 366`;
+
+      setTimeout(()=>{
+        drum.classList.remove('spin');
+        drawing=false;
+        if(nextIdx<366){
+          document.getElementById('btnDraw').disabled=false;
+          document.getElementById('sdot').classList.remove('on');
+          document.getElementById('stxt').textContent=`Los ${entry.lotteryNum} — ${entry.label} — bereit`;
+        } else {
+          document.getElementById('btnDraw').disabled=true;
+          document.getElementById('btnAuto').disabled=true;
+          document.getElementById('btnAuto').textContent='⟳ Auto';
+          document.getElementById('sdot').classList.remove('on');
+          document.getElementById('stxt').textContent='Alle 366 Kapseln gezogen';
+          if(autoInt){clearInterval(autoInt);autoInt=null;}
+          const d=document.createElement('div');
+          d.className='done-msg';d.textContent='— Ziehung abgeschlossen —';
+          document.getElementById('rlist').prepend(d);
+        }
+      },900);
+    }
+  },90);
+}
+
+function addEntry(e){
+  const list=document.getElementById('rlist');
+  const el=document.createElement('div');
+  el.className='rentry new';
+  el.innerHTML=`<span class="eord">#${String(nextIdx).padStart(3,'0')}</span><span class="enum">${e.lotteryNum}</span><span class="edate">${e.label}</span>`;
+  list.prepend(el);
+  setTimeout(()=>el.classList.remove('new'),600);
+  document.getElementById('rightPanel').scrollTop=0;
+}
+
+function toggleAuto(){
+  if(autoInt){
+    clearInterval(autoInt);autoInt=null;
+    document.getElementById('btnAuto').textContent='⟳ Auto';
+    return;
+  }
+  if(nextIdx>=366)return;
+  document.getElementById('btnAuto').textContent='◼ Stop';
+  autoInt=setInterval(()=>{
+    if(nextIdx>=366||drawing){
+      clearInterval(autoInt);autoInt=null;
+      document.getElementById('btnAuto').textContent='⟳ Auto';
+      return;
+    }
+    drawOne();
+  },2000);
+}
+
+resetAll();
+</script>
+    
