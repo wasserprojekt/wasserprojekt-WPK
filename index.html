@@ -1,519 +1,1330 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vietnam Draft Lottery 1970 — Selective Service System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vietnam Draft Lottery 1969 — Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=Special+Elite&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-deep: #14090a;
+    --bg-wood: #2a1810;
+    --wood-light: #3d2418;
+    --wood-rim: #4a2e1a;
+    --amber: #ffc266;
+    --amber-bright: #ffe1a8;
+    --amber-glow: #ff9933;
+    --cream: #f4e6c5;
+    --cream-soft: #d4c4a0;
+    --red-warning: #d63838;
+    --red-glow: #ff3d3d;
+    --red-deep: #8b1a1a;
+    --green-safe: #4caf50;
+    --green-glow: #5fff66;
+    --gold: #c9a26b;
+    --gold-soft: #a07d3f;
+    --brass: #b8860b;
+    --brass-dark: #6e5208;
+    --shadow: rgba(0, 0, 0, 0.7);
+  }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #0e0a05;
-      overflow: hidden;
-    }
+  * { box-sizing: border-box; }
 
-    body {
-      font-family: 'Courier Prime', 'Courier New', monospace;
-      color: #c8a87a;
-      display: flex;
-      flex-direction: column;
-    }
+  html, body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    background: var(--bg-deep);
+  }
 
-    /* ── GRAIN + SCANLINES ── */
-    #grain {
-      position: fixed; inset: 0; pointer-events: none; z-index: 100;
-      opacity: 0.28;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
-    }
-    #scan {
-      position: fixed; inset: 0; pointer-events: none; z-index: 101;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.055) 3px, rgba(0,0,0,0.055) 4px);
-    }
-    .flash-ov {
-      position: fixed; inset: 0; pointer-events: none; z-index: 102;
-      opacity: 0; background: rgba(220,185,100,0.07);
-    }
-    .flash-ov.go { animation: fls 0.5s ease forwards; }
-    @keyframes fls { 0%{opacity:0} 25%{opacity:1} 100%{opacity:0} }
+  body {
+    font-family: 'Special Elite', 'Courier New', monospace;
+    color: var(--cream);
+    background:
+      /* vertical wood grain */
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.35) 0px,
+        transparent 1px,
+        transparent 3px,
+        rgba(255,200,100,0.02) 4px,
+        transparent 5px),
+      /* knots and grain noise */
+      repeating-linear-gradient(91deg,
+        rgba(0,0,0,0.15) 0px,
+        transparent 80px,
+        rgba(0,0,0,0.1) 160px,
+        transparent 240px),
+      radial-gradient(ellipse at 50% 30%, #3d2418 0%, #1a0e08 70%, #0a0503 100%);
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+  }
 
-    /* ── HEADER ── */
-    #hdr {
-      flex-shrink: 0;
-      text-align: center;
-      padding: clamp(10px, 2vh, 20px) clamp(12px, 3vw, 32px) clamp(8px, 1.5vh, 16px);
-      border-bottom: 2px solid #3d2a12;
-      position: relative; z-index: 5;
-      background: linear-gradient(180deg, #1a1108 0%, #130e06 100%);
-    }
-    #hdr .seal { font-size: clamp(18px, 3vw, 28px); margin-bottom: 4px; }
-    #hdr h1 {
-      font-family: 'Special Elite', monospace;
-      font-size: clamp(11px, 2vw, 19px);
-      letter-spacing: clamp(1px, 0.6vw, 4px);
-      text-transform: uppercase;
-      color: #ddb96a;
-      line-height: 1.35;
-    }
-    #hdr p {
-      font-size: clamp(8px, 1.2vw, 11px);
-      color: #6a4a22;
-      letter-spacing: clamp(1px, 0.4vw, 2.5px);
-      margin-top: 3px;
-    }
+  /* Subtle film-grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,200,100,0.03) 0px, transparent 1px),
+      radial-gradient(circle at 80% 70%, rgba(255,200,100,0.02) 0px, transparent 1px),
+      radial-gradient(circle at 60% 20%, rgba(0,0,0,0.05) 0px, transparent 2px);
+    background-size: 3px 3px, 5px 5px, 7px 7px;
+    opacity: 0.4;
+    z-index: 50;
+    mix-blend-mode: overlay;
+  }
 
-    /* ── MAIN AREA ── */
-    #main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr minmax(180px, 260px);
-      overflow: hidden;
-      position: relative; z-index: 5;
-      min-height: 0;
-    }
+  /* ─── Header ─── */
+  .header {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 28px 20px 18px;
+    border-bottom: 4px double var(--brass);
+    background:
+      linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+  }
 
-    /* ── LEFT: drum + controls ── */
-    #left {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(10px, 2vh, 18px);
-      padding: clamp(10px, 2vh, 20px) clamp(12px, 3vw, 28px);
-      border-right: 2px solid #2a1c0a;
-      overflow: hidden;
-    }
+  .stars-row {
+    color: var(--brass);
+    font-size: 0.9rem;
+    letter-spacing: 14px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 6px rgba(184,134,11,0.4);
+  }
 
-    /* DRUM */
-    .drum-wrap {
-      position: relative;
-      width: clamp(110px, 22vw, 200px);
-      height: clamp(110px, 22vw, 200px);
-      flex-shrink: 0;
-    }
-    .drum {
-      width: 100%; height: 100%;
-      border-radius: 50%;
-      border: clamp(3px, 0.5vw, 5px) solid #7a5a2a;
-      background: radial-gradient(circle at 35% 35%, #281c0c, #0c0804);
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.85), 0 0 0 1px #3a2510, 0 6px 28px rgba(0,0,0,0.7);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
-    }
-    .drum.spin { animation: drm 2.8s cubic-bezier(.25,.46,.45,.94) forwards; }
-    @keyframes drm {
-      0%   { transform: rotate(0deg); }
-      40%  { transform: rotate(360deg); }
-      75%  { transform: rotate(680deg); }
-      100% { transform: rotate(720deg); }
-    }
-    .drum-in {
-      width: 62%; height: 62%;
-      border-radius: 50%;
-      border: 2px solid #4a3018;
-      background: radial-gradient(circle at 40% 40%, #1a1006, #080602);
-      display: flex; align-items: center; justify-content: center; flex-direction: column;
-    }
-    #dnum {
-      font-family: 'Special Elite', monospace;
-      font-size: clamp(26px, 5.5vw, 52px);
-      color: #ddb96a;
-      text-shadow: 0 0 20px rgba(221,185,106,0.45);
-      line-height: 1;
-    }
-    #dnum.fl { animation: nfl 0.1s ease infinite; }
-    @keyframes nfl { 0%,100%{opacity:1} 50%{opacity:0.15} }
-    .dlabel { font-size: clamp(7px, 1vw, 9px); color: #4a3018; letter-spacing: 2px; margin-top: 2px; }
-    .drum-shine {
-      position: absolute; top: 13%; left: 18%; width: 34%; height: 24%;
-      border-radius: 50%;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.055), transparent);
-      pointer-events: none;
-    }
+  .title {
+    font-family: 'Big Shoulders Display', 'Impact', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.6rem);
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    color: var(--cream);
+    margin: 0;
+    line-height: 1;
+    text-shadow:
+      0 0 20px rgba(255,200,100,0.25),
+      2px 3px 0 var(--shadow);
+  }
 
-    /* DRAWN DATE BOX */
-    .info-box {
-      background: #0c0904; border: 2px solid #2a1c0a; border-radius: 3px;
-      padding: clamp(8px, 1.5vh, 14px) clamp(14px, 3vw, 22px);
-      text-align: center;
-      width: 100%; max-width: clamp(180px, 40vw, 280px);
-      flex-shrink: 0;
-    }
-    .info-box .lbl { font-size: clamp(7px, 1vw, 9px); letter-spacing: 2px; color: #4a3018; text-transform: uppercase; margin-bottom: 4px; }
-    #ddate { font-family: 'Special Elite', monospace; font-size: clamp(16px, 3.2vw, 26px); color: #ddb96a; letter-spacing: 2px; }
-    #dseq { font-size: clamp(9px, 1.2vw, 11px); color: #7a5a30; margin-top: 3px; min-height: 1em; }
+  .subtitle {
+    font-size: 0.78rem;
+    letter-spacing: 6px;
+    color: var(--gold);
+    margin-top: 10px;
+    opacity: 0.9;
+  }
 
-    /* CONTROLS */
-    .ctrls {
-      display: flex; flex-direction: column;
-      gap: clamp(6px, 1vh, 10px);
-      width: 100%; max-width: clamp(180px, 40vw, 280px);
-      flex-shrink: 0;
-    }
-    .ctr-row { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(5px, 1vw, 10px); }
+  .year-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 12px;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gold-soft);
+  }
 
-    .cnt-box {
-      background: #0c0904; border: 1px solid #201408; border-radius: 3px;
-      padding: clamp(5px, 1vh, 10px); text-align: center;
-    }
-    .cnt-n { font-family: 'Special Elite', monospace; font-size: clamp(18px, 3.5vw, 30px); color: #c4954a; line-height: 1; }
-    .cnt-l { font-size: clamp(7px, 1vw, 9px); color: #3a2510; letter-spacing: 1px; margin-top: 2px; }
+  .year-bar .badge {
+    border: 1px solid var(--brass);
+    background: rgba(184,134,11,0.1);
+    padding: 3px 14px;
+    color: var(--amber);
+  }
 
-    .btn {
-      display: block; width: 100%;
-      font-family: 'Courier Prime', monospace;
-      font-size: clamp(9px, 1.5vw, 13px);
-      letter-spacing: clamp(1px, 0.3vw, 2px);
-      text-transform: uppercase;
-      border: 2px solid; padding: clamp(7px, 1.3vh, 12px) 12px;
-      cursor: pointer; background: transparent;
-      transition: all 0.15s; border-radius: 2px; text-align: center;
-    }
-    .btn-main { border-color: #c4954a; color: #c4954a; }
-    .btn-main:hover:not(:disabled) { background: #c4954a; color: #0c0904; }
-    .btn-main:disabled { opacity: 0.35; cursor: not-allowed; }
-    .btn-sec { border-color: #3a2510; color: #6a4a28; font-size: clamp(8px, 1.2vw, 11px); padding: clamp(5px, 1vh, 9px) 10px; }
-    .btn-sec:hover:not(:disabled) { border-color: #7a5a30; color: #9a7a50; }
-    .btn-sec:disabled { opacity: 0.3; cursor: not-allowed; }
+  .year-bar hr {
+    flex: 0 0 60px;
+    border: none;
+    border-top: 1px solid var(--gold-soft);
+    margin: 0;
+    opacity: 0.5;
+  }
 
-    /* ── RIGHT: results ── */
-    #right {
-      padding: clamp(10px, 1.5vh, 18px) clamp(10px, 2vw, 18px);
-      background: #0c0803;
-      overflow-y: auto;
-      display: flex; flex-direction: column;
-      min-height: 0;
-    }
-    #right::-webkit-scrollbar { width: 4px; }
-    #right::-webkit-scrollbar-thumb { background: #3a2510; border-radius: 2px; }
-    .rtitle {
-      font-size: clamp(7px, 1vw, 9px); letter-spacing: 3px; color: #4a3018;
-      text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px;
-      border-bottom: 1px solid #1a1208; flex-shrink: 0;
-    }
-    #rlist { flex: 1; }
-    .rentry {
-      display: grid;
-      grid-template-columns: auto auto 1fr;
-      align-items: center;
-      gap: 6px;
-      padding: clamp(3px, 0.6vh, 6px) 2px;
-      border-bottom: 1px solid rgba(26,18,8,0.9);
-      animation: eslide 0.3s ease;
-    }
-    @keyframes eslide { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
-    .rentry.new { background: rgba(196,149,74,0.07); border-radius: 2px; }
-    .eord { font-size: clamp(8px, 1.1vw, 10px); color: #3a2510; white-space: nowrap; }
-    .enum { font-family: 'Special Elite', monospace; font-size: clamp(11px, 1.8vw, 15px); color: #ddb96a; text-align: center; min-width: 34px; }
-    .edate { font-size: clamp(8px, 1.2vw, 11px); color: #7a5a30; text-align: right; white-space: nowrap; }
-    .done-msg {
-      text-align: center; padding: clamp(10px, 2vh, 16px);
-      font-family: 'Special Elite', monospace; color: #c4954a;
-      font-size: clamp(10px, 1.5vw, 13px); letter-spacing: 2px;
-      border: 1px solid #2a1c0a; border-radius: 2px; margin-top: 8px;
-    }
+  /* ─── View container ─── */
+  .view-wrap {
+    position: relative;
+    z-index: 2;
+  }
 
-    /* ── FOOTER ── */
-    #foot {
-      flex-shrink: 0;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 6px;
-      padding: clamp(5px, 1vh, 9px) clamp(12px, 3vw, 20px);
-      background: #090602; border-top: 1px solid #1a1208;
-      position: relative; z-index: 5;
-    }
-    .sdot { width: 6px; height: 6px; border-radius: 50%; background: #3a2510; display: inline-block; margin-right: 5px; vertical-align: middle; }
-    .sdot.on { background: #c4954a; animation: blink 1s ease infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    .stxt { font-size: clamp(8px, 1.1vw, 10px); color: #4a3018; letter-spacing: 1px; }
-    .prog { display: flex; align-items: center; gap: 8px; }
-    .pbar { height: 3px; background: #181008; border-radius: 2px; overflow: hidden; width: clamp(60px, 12vw, 140px); }
-    .pfill { height: 100%; background: #c4954a; border-radius: 2px; transition: width 0.4s ease; }
+  .view {
+    display: none;
+    padding: 30px 20px 100px;
+    animation: fadeIn 0.5s ease;
+  }
+  .view.active { display: block; }
 
-    /* ── TICKER ── */
-    #ticker {
-      flex-shrink: 0;
-      padding: clamp(5px, 0.8vh, 8px) 0;
-      background: #07050100; border-top: 1px solid #1a1208;
-      overflow: hidden; position: relative; z-index: 5;
-    }
-    .ticin {
-      display: flex; gap: 40px; white-space: nowrap;
-      font-size: clamp(8px, 1vw, 10px); color: #3a2510; letter-spacing: 1px;
-      animation: tick 40s linear infinite;
-    }
-    @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    /* ── MOBILE PORTRAIT ── */
-    @media (max-width: 600px) and (orientation: portrait) {
-      html, body { overflow-y: auto; }
-      #main { grid-template-columns: 1fr; grid-template-rows: auto auto; }
-      #left { border-right: none; border-bottom: 2px solid #2a1c0a; }
-      #right { max-height: 38vh; }
-      .drum-wrap { width: clamp(120px, 45vw, 170px); height: clamp(120px, 45vw, 170px); }
-    }
+  /* ─── Simulator Layout ─── */
+  .simulator {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+  }
 
-    /* ── LANDSCAPE MOBILE ── */
-    @media (max-width: 812px) and (orientation: landscape) {
-      #hdr h1 { font-size: 11px; }
-      #hdr p { display: none; }
-    }
-  </style>
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  /* ─── Counter strip ─── */
+  .counter-strip {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--brass);
+    padding: 10px 24px;
+    border-radius: 2px;
+  }
+  .counter-strip .lbl {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--gold);
+  }
+  .counter-strip .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: var(--amber-bright);
+    text-shadow: 0 0 12px var(--amber-glow);
+    min-width: 70px;
+    text-align: center;
+  }
+  .counter-strip .sep { color: var(--gold-soft); }
+  .counter-strip .total {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+  }
+
+  /* ─── Drum ─── */
+  .drum {
+    width: clamp(280px, 40vw, 420px);
+    height: clamp(280px, 40vw, 420px);
+    position: relative;
+    filter: drop-shadow(0 16px 30px rgba(0,0,0,0.7));
+  }
+
+  .drum-stand {
+    position: absolute;
+    inset: -20px -10px -28px -10px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .drum-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      conic-gradient(from 0deg,
+        #b8860b 0deg, #6e5208 30deg, #d4af37 60deg, #6e5208 90deg,
+        #b8860b 120deg, #6e5208 150deg, #d4af37 180deg, #6e5208 210deg,
+        #b8860b 240deg, #6e5208 270deg, #d4af37 300deg, #6e5208 330deg,
+        #b8860b 360deg);
+    padding: 8px;
+    box-shadow:
+      0 0 0 4px var(--brass-dark),
+      0 0 0 6px var(--wood-rim),
+      inset 0 0 30px rgba(0,0,0,0.6),
+      0 0 60px rgba(255,150,50,0.18);
+  }
+
+  .drum-frame::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1a0a04 0%, #0a0503 100%);
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.95),
+      inset 0 0 8px rgba(255,200,100,0.2);
+  }
+
+  /* Rivets around the rim */
+  .drum-rivets {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .drum-rivets svg { width: 100%; height: 100%; }
+
+  /* Cage interior - rotates */
+  .drum-cage {
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    transform-origin: center;
+    transition: transform 0.35s ease;
+  }
+  .drum-cage svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .drum-cage.spinning {
+    animation: spin 1.8s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(1620deg); }
+  }
+
+  /* The window in the center where the date appears */
+  .drum-window {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52%;
+    height: 52%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, #3a1f0c 0%, #1a0a04 50%, #060201 100%);
+    border: 5px solid var(--brass);
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,0.95),
+      inset 0 0 10px rgba(255,200,100,0.2),
+      0 0 0 2px var(--brass-dark),
+      0 0 25px rgba(255,179,71,0.18);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Small CRT scanline overlay on window */
+  .drum-window::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      repeating-linear-gradient(0deg,
+        rgba(0,0,0,0.3) 0px,
+        transparent 1px,
+        transparent 3px,
+        rgba(0,0,0,0.2) 4px);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .drum-window::after {
+    content: '';
+    position: absolute;
+    top: 8%; left: 12%;
+    width: 30%; height: 25%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    border-radius: 50%;
+  }
+
+  .drum-display {
+    text-align: center;
+    color: var(--amber-bright);
+    z-index: 1;
+    padding: 20px;
+  }
+
+  .drum-display .label {
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 6px;
+    opacity: 0.85;
+  }
+
+  .drum-display .date {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    letter-spacing: 5px;
+    line-height: 1;
+    color: var(--amber-bright);
+    text-shadow:
+      0 0 12px var(--amber-glow),
+      0 0 4px var(--amber-bright);
+  }
+
+  .drum-display .number {
+    margin-top: 10px;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+  }
+
+  .drum-display.idle .date {
+    color: var(--gold-soft);
+    text-shadow: none;
+    opacity: 0.5;
+  }
+
+  /* Soft glow ring when newly drawn */
+  .drum-window.flash {
+    animation: flashGlow 1.2s ease-out;
+  }
+  @keyframes flashGlow {
+    0%   { box-shadow: inset 0 0 30px rgba(0,0,0,0.95), inset 0 0 10px rgba(255,200,100,0.2), 0 0 0 2px var(--brass-dark), 0 0 60px rgba(255,179,71,0.85); }
+    100% { box-shadow: inset 0 0 30px rgba(0,0,0,0.95), inset 0 0 10px rgba(255,200,100,0.2), 0 0 0 2px var(--brass-dark), 0 0 25px rgba(255,179,71,0.18); }
+  }
+
+  /* ─── Draw button ─── */
+  .draw-btn {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 8px;
+    padding: 16px 56px;
+    background:
+      linear-gradient(to bottom, #cc4218 0%, #8a2810 60%, #621808 100%);
+    color: var(--cream);
+    border: 3px solid var(--brass);
+    border-radius: 4px;
+    cursor: pointer;
+    text-shadow: 1px 2px 3px rgba(0,0,0,0.7);
+    box-shadow:
+      0 6px 0 #3a0e04,
+      0 8px 16px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,200,150,0.3),
+      inset 0 -8px 16px rgba(0,0,0,0.3);
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .draw-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #e04a1c 0%, #9a3015 60%, #722010 100%);
+    transform: translateY(-1px);
+  }
+
+  .draw-btn:active:not(:disabled) {
+    transform: translateY(5px);
+    box-shadow:
+      0 1px 0 #3a0e04,
+      0 2px 4px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,200,150,0.3);
+  }
+
+  .draw-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: linear-gradient(to bottom, #6a3018, #3a1810);
+  }
+
+  /* ─── Ticker / drawn list ─── */
+  .ticker {
+    width: 100%;
+    max-width: 920px;
+    margin: 14px auto 0;
+    background: rgba(0,0,0,0.55);
+    border-top: 1px solid var(--brass);
+    border-bottom: 1px solid var(--brass);
+    padding: 10px 14px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ticker::before, .ticker::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 50px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .ticker::before { left: 0; background: linear-gradient(90deg, rgba(0,0,0,0.9), transparent); }
+  .ticker::after { right: 0; background: linear-gradient(-90deg, rgba(0,0,0,0.9), transparent); }
+
+  .ticker-label {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: var(--gold);
+    padding-right: 14px;
+    border-right: 1px solid var(--gold-soft);
+    margin-right: 14px;
+  }
+
+  .ticker-list {
+    display: inline-flex;
+    gap: 22px;
+    list-style: none;
+    margin: 0; padding: 0;
+    font-size: 0.95rem;
+  }
+
+  .ticker-list li {
+    color: var(--cream);
+    white-space: nowrap;
+  }
+
+  .ticker-list li .num {
+    color: var(--amber);
+    font-weight: bold;
+    margin-right: 6px;
+  }
+
+  .ticker-list li.fresh {
+    animation: fresh 1.5s ease-out;
+  }
+  @keyframes fresh {
+    0%   { color: var(--amber-bright); text-shadow: 0 0 10px var(--amber-glow); }
+    100% { color: var(--cream); text-shadow: none; }
+  }
+
+  .ticker-empty {
+    color: var(--gold-soft);
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  /* ─── Probability View ─── */
+  .probability {
+    max-width: 940px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .input-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--brass);
+    padding: 14px 22px;
+    border-radius: 2px;
+    margin-bottom: 6px;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.5);
+  }
+
+  .input-card .ic-label {
+    font-size: 0.72rem;
+    letter-spacing: 4px;
+    color: var(--gold);
+  }
+
+  .input-card select {
+    background: var(--bg-wood);
+    color: var(--amber-bright);
+    border: 1px solid var(--brass);
+    padding: 8px 14px;
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.6);
+  }
+  .input-card select:focus { border-color: var(--amber); }
+
+  .gauge-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 14px auto 0;
+    aspect-ratio: 800 / 470;
+  }
+
+  .gauge {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .needle-pivot {
+    transform-origin: 400px 400px;
+    transform-box: view-box;
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ─── Result panel ─── */
+  .result-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 700px;
+    margin: 18px auto 0;
+  }
+
+  .result-card {
+    border: 1px solid var(--brass);
+    background: rgba(0,0,0,0.5);
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+  }
+
+  .result-card .lbl {
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .result-card .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: var(--amber-bright);
+    text-shadow: 0 0 10px var(--amber-glow);
+    line-height: 1;
+  }
+
+  .result-card.cat-extreme .val { color: #ff5050; text-shadow: 0 0 14px #ff2222; }
+  .result-card.cat-high    .val { color: #ff944d; text-shadow: 0 0 12px #ff6620; }
+  .result-card.cat-medium  .val { color: #ffd060; text-shadow: 0 0 12px #ffaa30; }
+  .result-card.cat-low     .val { color: #b6e870; text-shadow: 0 0 12px #6cd83a; }
+  .result-card.cat-verylow .val { color: #66ff8c; text-shadow: 0 0 14px #44dd55; }
+
+  /* ─── Toggle button ─── */
+  .toggle-mode {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 100;
+    background: rgba(20,12,5,0.92);
+    color: var(--gold);
+    border: 1px solid var(--brass);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow:
+      0 4px 10px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,200,100,0.1);
+  }
+
+  .toggle-mode:hover {
+    background: rgba(40,24,12,0.95);
+    color: var(--amber-bright);
+    border-color: var(--amber);
+  }
+
+  .toggle-mode .arrow {
+    width: 14px; height: 8px;
+    position: relative;
+    display: inline-block;
+  }
+  .toggle-mode .arrow::before,
+  .toggle-mode .arrow::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    height: 1.5px;
+    border-radius: 1px;
+  }
+  .toggle-mode .arrow::before { top: 0; left: 0; right: 4px; }
+  .toggle-mode .arrow::after  { top: 5px; left: 4px; right: 0; }
+
+  /* Help text */
+  .hint {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: var(--gold-soft);
+    margin-top: 6px;
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  /* responsive */
+  @media (max-width: 720px) {
+    .title { font-size: 2rem; letter-spacing: 0.12em; }
+    .stars-row { letter-spacing: 8px; }
+    .draw-btn { padding: 14px 40px; font-size: 1.05rem; letter-spacing: 5px; }
+    .result-card .val { font-size: 1.3rem; }
+    .ticker-list { font-size: 0.85rem; gap: 16px; }
+    .input-card { flex-wrap: wrap; gap: 10px; padding: 12px; }
+    .toggle-mode { font-size: 0.7rem; letter-spacing: 2px; padding: 8px 12px; }
+  }
+</style>
 </head>
 <body>
-  <div id="grain"></div>
-  <div id="scan"></div>
-  <div class="flash-ov" id="flov"></div>
 
-  <!-- HEADER -->
-  <div id="hdr">
-    <div class="seal">⚖</div>
-    <h1>Selective Service System — National Draft Lottery</h1>
-    <p>Washington D.C. &nbsp;·&nbsp; 1. Juli 1970 &nbsp;·&nbsp; Offizielles Ziehungsprotokoll &nbsp;·&nbsp; Jahrgang 1951</p>
+<header class="header">
+  <div class="stars-row">★ ★ ★ ★ ★</div>
+  <h1 class="title">Vietnam Draft Lottery</h1>
+  <div class="subtitle">SELECTIVE SERVICE SYSTEM &middot; RANDOM SELECTION SEQUENCE</div>
+  <div class="year-bar">
+    <hr><span>EST.</span><span class="badge">DEC 1, 1969</span><span>WASHINGTON D. C.</span><hr>
   </div>
+</header>
 
-  <!-- MAIN -->
-  <div id="main">
+<main class="view-wrap">
 
-    <!-- LEFT -->
-    <div id="left">
+  <!-- ===================== SIMULATOR VIEW ===================== -->
+  <section id="view-sim" class="view active">
+    <div class="simulator">
+      <div class="stage">
 
-      <div class="drum-wrap">
-        <div class="drum" id="drum">
-          <div class="drum-in">
-            <div id="dnum">—</div>
-            <div class="dlabel">LOSNUMMER</div>
+        <!-- counter -->
+        <div class="counter-strip">
+          <span class="lbl">DRAFT NO.</span>
+          <span class="val" id="counter-val">000</span>
+          <span class="sep">/</span>
+          <span class="total">366</span>
+        </div>
+
+        <!-- Drum -->
+        <div class="drum" aria-label="Drawing drum">
+          <div class="drum-frame">
+            <!-- decorative rivets -->
+            <div class="drum-rivets">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <g fill="#3a2818" stroke="#1a0a04" stroke-width="0.4">
+                  <!-- 12 rivets around edge -->
+                  <circle cx="50" cy="3"  r="1.6"/>
+                  <circle cx="73.5" cy="9.4" r="1.6"/>
+                  <circle cx="90.6" cy="26.5" r="1.6"/>
+                  <circle cx="97" cy="50" r="1.6"/>
+                  <circle cx="90.6" cy="73.5" r="1.6"/>
+                  <circle cx="73.5" cy="90.6" r="1.6"/>
+                  <circle cx="50" cy="97" r="1.6"/>
+                  <circle cx="26.5" cy="90.6" r="1.6"/>
+                  <circle cx="9.4" cy="73.5" r="1.6"/>
+                  <circle cx="3" cy="50" r="1.6"/>
+                  <circle cx="9.4" cy="26.5" r="1.6"/>
+                  <circle cx="26.5" cy="9.4" r="1.6"/>
+                </g>
+              </svg>
+            </div>
           </div>
-          <div class="drum-shine"></div>
+
+          <!-- Rotating cage (spokes/wires inside) -->
+          <div class="drum-cage" id="drum-cage">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="cageBg" cx="50%" cy="40%">
+                  <stop offset="0%"  stop-color="#3a1f0c" stop-opacity="0.3"/>
+                  <stop offset="60%" stop-color="#1a0a04" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#000" stop-opacity="0.85"/>
+                </radialGradient>
+              </defs>
+
+              <!-- background fill of cage -->
+              <circle cx="100" cy="100" r="98" fill="url(#cageBg)"/>
+
+              <!-- Wire mesh: radial spokes -->
+              <g stroke="#7a5a30" stroke-width="0.7" opacity="0.85">
+                <!-- 16 spokes -->
+                <line x1="100" y1="100" x2="100" y2="2"/>
+                <line x1="100" y1="100" x2="138" y2="10"/>
+                <line x1="100" y1="100" x2="170" y2="32"/>
+                <line x1="100" y1="100" x2="190" y2="62"/>
+                <line x1="100" y1="100" x2="198" y2="100"/>
+                <line x1="100" y1="100" x2="190" y2="138"/>
+                <line x1="100" y1="100" x2="170" y2="168"/>
+                <line x1="100" y1="100" x2="138" y2="190"/>
+                <line x1="100" y1="100" x2="100" y2="198"/>
+                <line x1="100" y1="100" x2="62" y2="190"/>
+                <line x1="100" y1="100" x2="30" y2="168"/>
+                <line x1="100" y1="100" x2="10" y2="138"/>
+                <line x1="100" y1="100" x2="2" y2="100"/>
+                <line x1="100" y1="100" x2="10" y2="62"/>
+                <line x1="100" y1="100" x2="30" y2="32"/>
+                <line x1="100" y1="100" x2="62" y2="10"/>
+              </g>
+
+              <!-- concentric wire rings -->
+              <g fill="none" stroke="#7a5a30" stroke-width="0.7" opacity="0.7">
+                <circle cx="100" cy="100" r="92"/>
+                <circle cx="100" cy="100" r="76"/>
+                <circle cx="100" cy="100" r="60"/>
+              </g>
+
+              <!-- Heavier outer cage band -->
+              <circle cx="100" cy="100" r="96" fill="none" stroke="#9a7848" stroke-width="1.2" opacity="0.9"/>
+
+              <!-- A few "capsule" shadows hinted inside the cage so the spin reads -->
+              <g opacity="0.5">
+                <ellipse cx="60" cy="50" rx="6" ry="3.2" fill="#d9a25a" transform="rotate(-25 60 50)"/>
+                <ellipse cx="140" cy="60" rx="6" ry="3.2" fill="#a87a3a" transform="rotate(20 140 60)"/>
+                <ellipse cx="150" cy="130" rx="6" ry="3.2" fill="#c4915a" transform="rotate(60 150 130)"/>
+                <ellipse cx="55" cy="140" rx="6" ry="3.2" fill="#8a5e2a" transform="rotate(-50 55 140)"/>
+                <ellipse cx="35" cy="80" rx="6" ry="3.2" fill="#b8884a" transform="rotate(15 35 80)"/>
+                <ellipse cx="120" cy="160" rx="6" ry="3.2" fill="#9a6a30" transform="rotate(-30 120 160)"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Center display window -->
+          <div class="drum-window" id="drum-window">
+            <div class="drum-display idle" id="drum-display">
+              <div class="label">BEREIT</div>
+              <div class="date">— —</div>
+              <div class="number">DRÜCKE „ZIEHEN"</div>
+            </div>
+          </div>
         </div>
+
+        <button class="draw-btn" id="draw-btn">Ziehen</button>
+
+        <!-- Ticker tape -->
+        <div class="ticker" aria-label="Recently drawn">
+          <span class="ticker-label">GEZOGEN</span>
+          <ul class="ticker-list" id="ticker-list">
+            <li class="ticker-empty">Noch keine Ziehungen…</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROBABILITY VIEW ===================== -->
+  <section id="view-prob" class="view">
+    <div class="probability">
+      <div class="input-card">
+        <span class="ic-label">GEBURTSDATUM</span>
+        <select id="day-input" aria-label="Tag"></select>
+        <select id="month-input" aria-label="Monat">
+          <option value="1">JAN</option><option value="2">FEB</option>
+          <option value="3">MÄR</option><option value="4">APR</option>
+          <option value="5">MAI</option><option value="6">JUN</option>
+          <option value="7">JUL</option><option value="8">AUG</option>
+          <option value="9">SEP</option><option value="10">OKT</option>
+          <option value="11">NOV</option><option value="12">DEZ</option>
+        </select>
+      </div>
+      <div class="hint">Wähle Tag und Monat — die Skala zeigt deine Einberufungswahrscheinlichkeit</div>
+
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 800 470" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Arc gradient (red → green) -->
+            <linearGradient id="arc-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"  stop-color="#cc1818"/>
+              <stop offset="14%" stop-color="#dd4422"/>
+              <stop offset="32%" stop-color="#dd7a26"/>
+              <stop offset="50%" stop-color="#c9a440"/>
+              <stop offset="68%" stop-color="#88aa3a"/>
+              <stop offset="86%" stop-color="#4caf50"/>
+              <stop offset="100%" stop-color="#3aa446"/>
+            </linearGradient>
+
+            <!-- Red retro backlight -->
+            <radialGradient id="red-back" cx="0.12" cy="0.95" r="0.7">
+              <stop offset="0%"  stop-color="#ff2828" stop-opacity="0.85"/>
+              <stop offset="40%" stop-color="#cc1818" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#cc1818" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Green retro backlight -->
+            <radialGradient id="green-back" cx="0.88" cy="0.95" r="0.7">
+              <stop offset="0%"  stop-color="#3fff5a" stop-opacity="0.75"/>
+              <stop offset="40%" stop-color="#2faa3a" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#2faa3a" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Needle glow -->
+            <filter id="needle-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4"/>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+
+            <!-- Lamp glow -->
+            <filter id="lamp-glow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="14"/>
+            </filter>
+
+            <!-- Bezel gradient -->
+            <linearGradient id="bezel-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stop-color="#5a3818"/>
+              <stop offset="50%" stop-color="#3d2418"/>
+              <stop offset="100%" stop-color="#1a0e08"/>
+            </linearGradient>
+
+            <linearGradient id="brass-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"  stop-color="#e6c378"/>
+              <stop offset="50%" stop-color="#b8860b"/>
+              <stop offset="100%" stop-color="#6e5208"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Dark backplate -->
+          <rect x="20" y="20" width="760" height="430" rx="8" ry="8"
+                fill="#1a0e08" stroke="url(#brass-grad)" stroke-width="2"/>
+
+          <!-- Retro backlights along upper edge of arc -->
+          <ellipse cx="100" cy="395" rx="200" ry="160" fill="url(#red-back)"/>
+          <ellipse cx="700" cy="395" rx="200" ry="160" fill="url(#green-back)"/>
+
+          <!-- Outer wood/bezel arc -->
+          <path d="M 60 400 A 340 340 0 0 1 740 400"
+                stroke="url(#bezel-grad)" stroke-width="64" fill="none" stroke-linecap="round"/>
+
+          <!-- Inner thin brass ring -->
+          <path d="M 80 400 A 320 320 0 0 1 720 400"
+                stroke="url(#brass-grad)" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+
+          <!-- Color gradient arc (the actual scale) -->
+          <path d="M 100 400 A 300 300 0 0 1 700 400"
+                stroke="url(#arc-grad)" stroke-width="32" fill="none" stroke-linecap="butt"/>
+
+          <!-- Outer subtle glow ring on top of arc -->
+          <path d="M 100 400 A 300 300 0 0 1 700 400"
+                stroke="white" stroke-width="2" fill="none" stroke-linecap="butt" opacity="0.15"/>
+
+          <!-- Tick marks generated by JS -->
+          <g id="ticks"></g>
+
+          <!-- Region labels -->
+          <text x="100" y="445" text-anchor="middle" fill="#ff7575"
+                font-family="Big Shoulders Display, Impact, sans-serif"
+                font-size="22" font-weight="900" letter-spacing="3"
+                style="text-shadow: 0 0 8px #ff2222;">EINBERUFEN</text>
+          <text x="700" y="445" text-anchor="middle" fill="#7eea88"
+                font-family="Big Shoulders Display, Impact, sans-serif"
+                font-size="22" font-weight="900" letter-spacing="3"
+                style="text-shadow: 0 0 8px #44cc55;">VERSCHONT</text>
+
+          <!-- Title curve / center label -->
+          <text x="400" y="180" text-anchor="middle" fill="#c9a26b"
+                font-family="Big Shoulders Display, Impact, sans-serif"
+                font-size="16" font-weight="700" letter-spacing="6">EINZIEHUNGS&#8209;WAHRSCHEINLICHKEIT</text>
+          <text x="400" y="206" text-anchor="middle" fill="#c9a26b"
+                font-family="Special Elite, monospace"
+                font-size="9" letter-spacing="4" opacity="0.7">based on 1970 random selection sequence</text>
+
+          <!-- Endpoint labels -->
+          <text x="60" y="420" text-anchor="middle" fill="#ff9090"
+                font-family="Special Elite, monospace" font-size="11" letter-spacing="2">No. 1</text>
+          <text x="740" y="420" text-anchor="middle" fill="#9eea9e"
+                font-family="Special Elite, monospace" font-size="11" letter-spacing="2">No. 366</text>
+
+          <!-- Pivot housing -->
+          <circle cx="400" cy="400" r="40" fill="#1a0e08" stroke="url(#brass-grad)" stroke-width="3"/>
+          <circle cx="400" cy="400" r="28" fill="#3d2418"/>
+
+          <!-- Needle (initially pointing UP = neutral) -->
+          <g class="needle-pivot" id="needle-pivot" transform="rotate(0 400 400)">
+            <line x1="400" y1="400" x2="400" y2="115"
+                  stroke="#ffe9b0" stroke-width="4" stroke-linecap="round" filter="url(#needle-glow)"/>
+            <polygon points="400,98 392,128 408,128"
+                     fill="#ffeec5" filter="url(#needle-glow)"/>
+            <line x1="400" y1="400" x2="400" y2="430"
+                  stroke="#b8860b" stroke-width="6" stroke-linecap="round"/>
+          </g>
+
+          <!-- Pivot cap -->
+          <circle cx="400" cy="400" r="14" fill="url(#brass-grad)" stroke="#1a0e08" stroke-width="2"/>
+          <circle cx="400" cy="400" r="5" fill="#1a0e08"/>
+
+          <!-- Indicator lamps (small "diodes" along upper bezel) -->
+          <g id="lamps"></g>
+        </svg>
       </div>
 
-      <div class="info-box">
-        <div class="lbl">Gezogenes Datum</div>
-        <div id="ddate">— — —</div>
-        <div id="dseq">&nbsp;</div>
-      </div>
-
-      <div class="ctrls">
-        <div class="ctr-row">
-          <div class="cnt-box"><div class="cnt-n" id="cntN">0</div><div class="cnt-l">Gezogen</div></div>
-          <div class="cnt-box"><div class="cnt-n" id="cntR">366</div><div class="cnt-l">Verbleibend</div></div>
+      <div class="result-row" id="result-row">
+        <div class="result-card" id="card-num">
+          <div class="lbl">PLATZIERUNG</div>
+          <div class="val">—</div>
         </div>
-        <button class="btn btn-main" id="btnDraw" onclick="drawOne()">▶ Kapsel ziehen</button>
-        <div class="ctr-row">
-          <button class="btn btn-sec" id="btnAuto" onclick="toggleAuto()">⟳ Auto-Ziehung</button>
-          <button class="btn btn-sec" onclick="resetAll()">↺ Neustart</button>
+        <div class="result-card" id="card-cat">
+          <div class="lbl">WAHRSCHEINLICHKEIT</div>
+          <div class="val">—</div>
+        </div>
+        <div class="result-card" id="card-pct">
+          <div class="lbl">PROZENT-RANG</div>
+          <div class="val">—</div>
         </div>
       </div>
-
     </div>
+  </section>
 
-    <!-- RIGHT -->
-    <div id="right">
-      <div class="rtitle">● Ziehungsprotokoll 1970</div>
-      <div id="rlist"></div>
-    </div>
+</main>
 
-  </div>
+<button class="toggle-mode" id="toggle-mode" aria-label="Modus umschalten">
+  <span class="arrow"></span>
+  <span id="toggle-label">Geburtsdatum prüfen</span>
+</button>
 
-  <!-- FOOTER -->
-  <div id="foot">
-    <div><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">Bereit zur Ziehung</span></div>
-    <div class="prog">
-      <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
-      <span class="stxt" id="ppct">0 / 366</span>
-    </div>
-  </div>
+<script>
+  // ── ECHTE DATEN: 1970 Random Selection Sequence ──
+  const RAW = [
+    [305,86,108,32,330,249,93,111,225,359,19,129],
+    [159,144,29,271,298,228,350,45,161,125,34,328],
+    [251,297,267,83,40,301,115,261,49,244,348,157],
+    [215,210,275,81,276,20,279,145,232,202,266,165],
+    [101,214,293,269,364,28,188,54,82,24,310,56],
+    [224,347,139,253,155,110,327,114,6,87,76,10],
+    [306,91,122,147,35,85,50,168,8,234,51,12],
+    [199,181,213,312,321,366,13,48,184,283,97,105],
+    [194,338,317,219,197,335,277,106,263,342,80,43],
+    [325,216,323,218,65,206,284,21,71,220,282,41],
+    [329,150,136,14,37,134,248,324,158,237,46,39],
+    [221,68,300,346,133,272,15,142,242,72,66,314],
+    [318,152,259,124,295,69,42,307,175,138,126,163],
+    [238,4,354,231,178,356,331,198,1,294,127,26],
+    [17,89,169,273,130,180,322,102,113,171,131,320],
+    [121,212,166,148,55,274,120,44,207,254,107,96],
+    [235,189,33,260,112,73,98,154,255,288,143,304],
+    [140,292,332,90,278,341,190,141,246,5,146,128],
+    [58,25,200,336,75,104,227,311,177,241,203,240],
+    [280,302,239,345,183,360,187,344,63,192,185,135],
+    [186,363,334,62,250,60,27,291,204,243,156,70],
+    [337,290,265,316,326,247,153,339,160,117,9,53],
+    [118,57,256,252,319,109,172,116,119,201,182,162],
+    [59,236,258,2,31,358,23,36,195,196,230,95],
+    [52,179,343,351,361,137,67,286,149,176,132,84],
+    [92,365,170,340,357,22,303,245,18,7,309,173],
+    [355,205,268,74,296,64,289,352,233,264,47,78],
+    [77,299,223,262,308,222,88,167,257,94,281,123],
+    [349,285,362,191,226,353,270,61,151,229,99,16],
+    [164,null,217,208,103,209,287,333,315,38,174,3],
+    [211,null,30,null,313,null,193,11,null,79,null,100]
+  ];
+  const MONTHS = ['JAN','FEB','MÄR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DEZ'];
+  const MDAYS  = [31,28,31,30,31,30,31,31,30,31,30,31];
 
-  <!-- TICKER -->
-  <div id="ticker">
-    <div class="ticin">
-      <span>SELECTIVE SERVICE ACT 1970 — CONGRESSIONAL RECORD — DRAFT LOTTERY — 366 KAPSELN — GEBURTSDATEN JAHRGANG 1951 — ALLE MÄNNER — OFFIZIELLES PROTOKOLL — WASHINGTON D.C. — SELECTIVE SERVICE —</span>
-      <span>SELECTIVE SERVICE ACT 1970 — CONGRESSIONAL RECORD — DRAFT LOTTERY — 366 KAPSELN — GEBURTSDATEN JAHRGANG 1951 — ALLE MÄNNER — OFFIZIELLES PROTOKOLL — WASHINGTON D.C. — SELECTIVE SERVICE —</span>
-    </div>
-  </div>
+  // ── Build lookups ──
+  // orderedDates[n] = {day, month, monthName} for draft number n (1..366)
+  // dateToNum["d-m"] = draft number
+  const orderedDates = new Array(367);
+  const dateToNum = {};
+  for (let m = 0; m < 12; m++) {
+    const maxDay = m === 1 ? 29 : MDAYS[m]; // Feb leap year
+    for (let d = 0; d < maxDay; d++) {
+      const num = RAW[d][m];
+      if (num !== null && num !== undefined) {
+        const day = d + 1, month = m + 1;
+        orderedDates[num] = { day, month, monthName: MONTHS[m] };
+        dateToNum[day + '-' + month] = num;
+      }
+    }
+  }
 
-  <script>
-    // ── ECHTE DATEN: 1970 Random Selection Sequence ──
-    // Zeile = Tag 1–31, Spalte = Monat Jan–Dez
-    // Quelle: Selective Service System, July 1, 1970
-    const RAW = [
-      [305, 86,108, 32,330,249, 93,111,225,359, 19,129],
-      [159,144, 29,271,298,228,350, 45,161,125, 34,328],
-      [251,297,267, 83, 40,301,115,261, 49,244,348,157],
-      [215,210,275, 81,276, 20,279,145,232,202,266,165],
-      [101,214,293,269,364, 28,188, 54, 82, 24,310, 56],
-      [224,347,139,253,155,110,327,114,  6, 87, 76, 10],
-      [306, 91,122,147, 35, 85, 50,168,  8,234, 51, 12],
-      [199,181,213,312,321,366, 13, 48,184,283, 97,105],
-      [194,338,317,219,197,335,277,106,263,342, 80, 43],
-      [325,216,323,218, 65,206,284, 21, 71,220,282, 41],
-      [329,150,136, 14, 37,134,248,324,158,237, 46, 39],
-      [221, 68,300,346,133,272, 15,142,242, 72, 66,314],
-      [318,152,259,124,295, 69, 42,307,175,138,126,163],
-      [238,  4,354,231,178,356,331,198,  1,294,127, 26],
-      [ 17, 89,169,273,130,180,322,102,113,171,131,320],
-      [121,212,166,148, 55,274,120, 44,207,254,107, 96],
-      [235,189, 33,260,112, 73, 98,154,255,288,143,304],
-      [140,292,332, 90,278,341,190,141,246,  5,146,128],
-      [ 58, 25,200,336, 75,104,227,311,177,241,203,240],
-      [280,302,239,345,183,360,187,344, 63,192,185,135],
-      [186,363,334, 62,250, 60, 27,291,204,243,156, 70],
-      [337,290,265,316,326,247,153,339,160,117,  9, 53],
-      [118, 57,256,252,319,109,172,116,119,201,182,162],
-      [ 59,236,258,  2, 31,358, 23, 36,195,196,230, 95],
-      [ 52,179,343,351,361,137, 67,286,149,176,132, 84],
-      [ 92,365,170,340,357, 22,303,245, 18,  7,309,173],
-      [355,205,268, 74,296, 64,289,352,233,264, 47, 78],
-      [ 77,299,223,262,308,222, 88,167,257, 94,281,123],
-      [349,285,362,191,226,353,270, 61,151,229, 99, 16],
-      [164,null,217,208,103,209,287,333,315, 38,174,  3],
-      [211,null, 30,null,313,null,193, 11,null, 79,null,100],
+  function fmtDate(o) {
+    return String(o.day).padStart(2,'0') + ' ' + o.monthName;
+  }
+
+  // ────────────────── SIMULATOR ──────────────────
+  let drawIndex = 0;       // already drawn count (0..366)
+  let isSpinning = false;
+  let pool = [];           // remaining draft numbers in historical order
+  function resetPool() {
+    pool = [];
+    for (let n = 1; n <= 366; n++) pool.push(n);
+  }
+  resetPool();
+
+  const cage          = document.getElementById('drum-cage');
+  const window_       = document.getElementById('drum-window');
+  const display       = document.getElementById('drum-display');
+  const drawBtn       = document.getElementById('draw-btn');
+  const counterVal    = document.getElementById('counter-val');
+  const tickerList    = document.getElementById('ticker-list');
+
+  function setCounter(n) { counterVal.textContent = String(n).padStart(3,'0'); }
+
+  function setIdleDisplay() {
+    display.classList.add('idle');
+    display.innerHTML = `
+      <div class="label">BEREIT</div>
+      <div class="date">— —</div>
+      <div class="number">DRÜCKE „ZIEHEN"</div>`;
+  }
+
+  function setDoneDisplay() {
+    display.classList.add('idle');
+    display.innerHTML = `
+      <div class="label">FERTIG</div>
+      <div class="date">366/366</div>
+      <div class="number">ALLE GEZOGEN</div>`;
+  }
+
+  function pushTicker(num, dateObj) {
+    // Remove the empty placeholder if present
+    const empty = tickerList.querySelector('.ticker-empty');
+    if (empty) empty.remove();
+    const li = document.createElement('li');
+    li.className = 'fresh';
+    li.innerHTML = `<span class="num">${num}.</span>${fmtDate(dateObj)}`;
+    tickerList.insertBefore(li, tickerList.firstChild);
+    // Cap to 18 items
+    while (tickerList.children.length > 18) {
+      tickerList.removeChild(tickerList.lastChild);
+    }
+    setTimeout(() => li.classList.remove('fresh'), 1500);
+  }
+
+  function drawNext() {
+    if (isSpinning) return;
+    if (drawIndex >= 366) {
+      // Reset for second round
+      drawIndex = 0;
+      resetPool();
+      tickerList.innerHTML = '<li class="ticker-empty">Noch keine Ziehungen…</li>';
+      setCounter(0);
+      setIdleDisplay();
+      drawBtn.textContent = 'Ziehen';
+      return;
+    }
+
+    isSpinning = true;
+    drawBtn.disabled = true;
+
+    const num = pool.shift();         // next draft number in historical order
+    const dateObj = orderedDates[num];
+
+    // Start spinning the cage
+    cage.classList.remove('spinning');
+    void cage.offsetWidth;            // reflow trick to restart animation
+    cage.classList.add('spinning');
+
+    // While spinning, scramble the date display
+    display.classList.remove('idle');
+    display.innerHTML = `
+      <div class="label">ZIEHE NR. ${num}…</div>
+      <div class="date" id="spin-date">--&nbsp;---</div>
+      <div class="number">…</div>`;
+    const spinDate = document.getElementById('spin-date');
+    let scrambleTimer = setInterval(() => {
+      const r = orderedDates[1 + Math.floor(Math.random() * 366)];
+      spinDate.textContent = fmtDate(r);
+    }, 55);
+
+    // After 1.8s reveal
+    setTimeout(() => {
+      clearInterval(scrambleTimer);
+      drawIndex++;
+      setCounter(drawIndex);
+      display.innerHTML = `
+        <div class="label">NR. ${num} GEZOGEN</div>
+        <div class="date">${fmtDate(dateObj)}</div>
+        <div class="number">${drawIndex} / 366</div>`;
+      window_.classList.remove('flash');
+      void window_.offsetWidth;
+      window_.classList.add('flash');
+
+      pushTicker(num, dateObj);
+
+      isSpinning = false;
+      drawBtn.disabled = false;
+      if (drawIndex >= 366) {
+        drawBtn.textContent = 'Neu starten';
+      }
+    }, 1800);
+  }
+
+  drawBtn.addEventListener('click', drawNext);
+
+  // ────────────────── PROBABILITY VIEW ──────────────────
+  const dayInput = document.getElementById('day-input');
+  const monthInput = document.getElementById('month-input');
+  const needlePivot = document.getElementById('needle-pivot');
+  const cardNum = document.getElementById('card-num');
+  const cardCat = document.getElementById('card-cat');
+  const cardPct = document.getElementById('card-pct');
+  const ticksGroup = document.getElementById('ticks');
+  const lampsGroup = document.getElementById('lamps');
+
+  function refreshDays() {
+    const m = parseInt(monthInput.value, 10);
+    const maxDay = m === 2 ? 29 : MDAYS[m - 1];
+    const prev = parseInt(dayInput.value, 10) || 1;
+    dayInput.innerHTML = '';
+    for (let d = 1; d <= maxDay; d++) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = String(d).padStart(2, '0');
+      dayInput.appendChild(opt);
+    }
+    dayInput.value = Math.min(prev, maxDay);
+  }
+
+  function categorize(n) {
+    // n: draft number (1 = first drawn = highest risk)
+    // Historic cutoff: lottery numbers 1–195 were called up.
+    if (n <= 50)  return { txt: 'EXTREM HOCH', cls: 'cat-extreme' };
+    if (n <= 125) return { txt: 'HOCH',        cls: 'cat-high' };
+    if (n <= 195) return { txt: 'MITTEL',      cls: 'cat-medium' };
+    if (n <= 280) return { txt: 'NIEDRIG',     cls: 'cat-low' };
+    return         { txt: 'SEHR NIEDRIG',      cls: 'cat-verylow' };
+  }
+
+  function applyCategoryClass(card, cls) {
+    card.classList.remove('cat-extreme','cat-high','cat-medium','cat-low','cat-verylow');
+    if (cls) card.classList.add(cls);
+  }
+
+  function updateProbability() {
+    const d = parseInt(dayInput.value, 10);
+    const m = parseInt(monthInput.value, 10);
+    const num = dateToNum[d + '-' + m];
+    if (!num) return; // shouldn't happen because dropdown is filtered
+
+    // Map: position 1 → -90deg (left), position 366 → +90deg (right)
+    const rotation = -90 + ((num - 1) / 365) * 180;
+    needlePivot.style.transform = `rotate(${rotation}deg)`;
+
+    cardNum.querySelector('.val').textContent = '#' + num;
+
+    const cat = categorize(num);
+    cardCat.querySelector('.val').textContent = cat.txt;
+    applyCategoryClass(cardCat, cat.cls);
+    applyCategoryClass(cardNum, cat.cls);
+
+    const pct = Math.round((num / 366) * 100);
+    cardPct.querySelector('.val').textContent = pct + '%';
+    applyCategoryClass(cardPct, cat.cls);
+  }
+
+  dayInput.addEventListener('change', updateProbability);
+  monthInput.addEventListener('change', () => {
+    refreshDays();
+    updateProbability();
+  });
+
+  // ── Build tick marks on the gauge ──
+  function buildTicks() {
+    const cx = 400, cy = 400;
+    // major ticks every 50, plus first & last
+    const majors = [1, 50, 100, 150, 200, 250, 300, 366];
+    const all = [];
+    for (let n = 1; n <= 366; n += 10) all.push({ n, major: false });
+    majors.forEach(n => {
+      const exist = all.find(t => t.n === n);
+      if (exist) exist.major = true;
+      else all.push({ n, major: true });
+    });
+
+    all.forEach(({ n, major }) => {
+      const angleDeg = 180 - ((n - 1) / 365) * 180;
+      const a = angleDeg * Math.PI / 180;
+      const rOuter = 320, rInner = major ? 296 : 304;
+      const x1 = cx + rOuter * Math.cos(a);
+      const y1 = cy - rOuter * Math.sin(a);
+      const x2 = cx + rInner * Math.cos(a);
+      const y2 = cy - rInner * Math.sin(a);
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('stroke', major ? '#ffe1a8' : 'rgba(255,225,168,0.4)');
+      line.setAttribute('stroke-width', major ? 2 : 1);
+      line.setAttribute('stroke-linecap', 'round');
+      ticksGroup.appendChild(line);
+
+      if (major) {
+        const rText = 274;
+        const tx = cx + rText * Math.cos(a);
+        const ty = cy - rText * Math.sin(a) + 4;
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', tx);
+        t.setAttribute('y', ty);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('fill', '#c9a26b');
+        t.setAttribute('font-family', 'Special Elite, monospace');
+        t.setAttribute('font-size', '11');
+        t.setAttribute('letter-spacing', '1');
+        t.textContent = n;
+        ticksGroup.appendChild(t);
+      }
+    });
+  }
+
+  // ── Build retro lamps on bezel (decorative) ──
+  function buildLamps() {
+    const cx = 400, cy = 400;
+    const lamps = [
+      { angle: 165, color: '#ff4040' },
+      { angle: 150, color: '#ff6030' },
+      { angle: 135, color: '#ff8030' },
+      { angle: 45,  color: '#88dd40' },
+      { angle: 30,  color: '#5cd060' },
+      { angle: 15,  color: '#3fce4a' }
     ];
+    lamps.forEach(({ angle, color }) => {
+      const a = angle * Math.PI / 180;
+      const r = 358;
+      const x = cx + r * Math.cos(a);
+      const y = cy - r * Math.sin(a);
+      // glow
+      const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      glow.setAttribute('cx', x); glow.setAttribute('cy', y);
+      glow.setAttribute('r', 12);
+      glow.setAttribute('fill', color);
+      glow.setAttribute('opacity', '0.45');
+      glow.setAttribute('filter', 'url(#lamp-glow)');
+      lampsGroup.appendChild(glow);
+      // bulb
+      const bulb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      bulb.setAttribute('cx', x); bulb.setAttribute('cy', y);
+      bulb.setAttribute('r', 3.4);
+      bulb.setAttribute('fill', color);
+      bulb.setAttribute('stroke', '#1a0e08');
+      bulb.setAttribute('stroke-width', '0.6');
+      lampsGroup.appendChild(bulb);
+    });
+  }
 
-    const MONTHS = ['JAN','FEB','MÄR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DEZ'];
-    const MDAYS  = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  buildTicks();
+  buildLamps();
 
-    function buildPool() {
-      const pool = [];
-      for (let m = 0; m < 12; m++) {
-        for (let d = 0; d < MDAYS[m]; d++) {
-          const num = RAW[d][m];
-          if (num != null) {
-            pool.push({
-              lotteryNum: num,
-              label: `${String(d + 1).padStart(2, '0')} ${MONTHS[m]}`
-            });
-          }
-        }
+  // initial date set
+  refreshDays();
+  monthInput.value = '9';   // September
+  refreshDays();
+  dayInput.value = '14';    // Sep 14 → No. 1 (a famous data point)
+  updateProbability();
+
+  // ────────────────── VIEW TOGGLE ──────────────────
+  const toggleBtn = document.getElementById('toggle-mode');
+  const toggleLabel = document.getElementById('toggle-label');
+  const viewSim  = document.getElementById('view-sim');
+  const viewProb = document.getElementById('view-prob');
+
+  let mode = 'sim';
+  function setMode(m) {
+    mode = m;
+    if (m === 'sim') {
+      viewSim.classList.add('active');
+      viewProb.classList.remove('active');
+      toggleLabel.textContent = 'Geburtsdatum prüfen';
+    } else {
+      viewProb.classList.add('active');
+      viewSim.classList.remove('active');
+      toggleLabel.textContent = 'Zur Ziehung';
+      // Re-trigger needle animation on entering
+      requestAnimationFrame(updateProbability);
+    }
+  }
+  toggleBtn.addEventListener('click', () => setMode(mode === 'sim' ? 'prob' : 'sim'));
+
+  // Default mode = sim (already set in markup, but make state explicit)
+  setMode('sim');
+
+  // Keyboard: Space / Enter triggers draw in sim mode
+  document.addEventListener('keydown', (e) => {
+    if (mode === 'sim' && (e.code === 'Space' || e.code === 'Enter')) {
+      // avoid scrolling page
+      if (document.activeElement === document.body || document.activeElement === drawBtn) {
+        e.preventDefault();
+        drawNext();
       }
-      pool.sort((a, b) => a.lotteryNum - b.lotteryNum);
-      return pool;
     }
-
-    const ALL = buildPool();
-    let nextIdx = 0;
-    let autoInt = null;
-    let drawing = false;
-
-    function resetAll() {
-      if (autoInt) { clearInterval(autoInt); autoInt = null; }
-      nextIdx = 0; drawing = false;
-      document.getElementById('dnum').textContent = '—';
-      document.getElementById('dnum').classList.remove('fl');
-      document.getElementById('ddate').textContent = '— — —';
-      document.getElementById('dseq').innerHTML = '&nbsp;';
-      document.getElementById('rlist').innerHTML = '';
-      document.getElementById('cntN').textContent = '0';
-      document.getElementById('cntR').textContent = '366';
-      document.getElementById('pfill').style.width = '0%';
-      document.getElementById('ppct').textContent = '0 / 366';
-      document.getElementById('btnDraw').disabled = false;
-      document.getElementById('btnAuto').disabled = false;
-      document.getElementById('btnAuto').textContent = '⟳ Auto-Ziehung';
-      document.getElementById('sdot').classList.remove('on');
-      document.getElementById('stxt').textContent = 'Bereit zur Ziehung';
-      document.getElementById('drum').classList.remove('spin');
-    }
-
-    function drawOne() {
-      if (nextIdx >= ALL.length || drawing) return;
-      drawing = true;
-      document.getElementById('btnDraw').disabled = true;
-
-      const entry = ALL[nextIdx];
-      nextIdx++;
-
-      document.getElementById('sdot').classList.add('on');
-      document.getElementById('stxt').textContent = 'Ziehung läuft…';
-
-      const drum = document.getElementById('drum');
-      const dn   = document.getElementById('dnum');
-      drum.classList.remove('spin');
-      void drum.offsetWidth;
-      drum.classList.add('spin');
-      dn.classList.add('fl');
-
-      let fc = 0;
-      const fi = setInterval(() => {
-        dn.textContent = Math.floor(Math.random() * 366) + 1;
-        fc++;
-        if (fc > 22) {
-          clearInterval(fi);
-          dn.textContent = entry.lotteryNum;
-          dn.classList.remove('fl');
-          document.getElementById('ddate').textContent = entry.label;
-          document.getElementById('dseq').textContent  = `Losnummer ${entry.lotteryNum} von 366`;
-
-          const flov = document.getElementById('flov');
-          flov.classList.remove('go'); void flov.offsetWidth; flov.classList.add('go');
-
-          addEntry(entry, nextIdx);
-
-          const pct = Math.round((nextIdx / 366) * 100);
-          document.getElementById('cntN').textContent = nextIdx;
-          document.getElementById('cntR').textContent = 366 - nextIdx;
-          document.getElementById('pfill').style.width = pct + '%';
-          document.getElementById('ppct').textContent  = `${nextIdx} / 366`;
-
-          setTimeout(() => {
-            drum.classList.remove('spin');
-            drawing = false;
-            if (nextIdx < ALL.length) {
-              document.getElementById('btnDraw').disabled = false;
-              document.getElementById('sdot').classList.remove('on');
-              document.getElementById('stxt').textContent = `Los ${entry.lotteryNum} — ${entry.label} — bereit`;
-            } else {
-              document.getElementById('btnDraw').disabled = true;
-              document.getElementById('btnAuto').disabled = true;
-              document.getElementById('sdot').classList.remove('on');
-              document.getElementById('stxt').textContent = 'Alle 366 Kapseln gezogen';
-              if (autoInt) { clearInterval(autoInt); autoInt = null; }
-              document.getElementById('btnAuto').textContent = '⟳ Auto-Ziehung';
-              const d = document.createElement('div');
-              d.className = 'done-msg';
-              d.textContent = '— Ziehung abgeschlossen —';
-              document.getElementById('rlist').prepend(d);
-            }
-          }, 900);
-        }
-      }, 90);
-    }
-
-    function addEntry(e, seq) {
-      const list = document.getElementById('rlist');
-      const el   = document.createElement('div');
-      el.className = 'rentry new';
-      el.innerHTML =
-        `<span class="eord">#${String(seq).padStart(3,'0')}</span>` +
-        `<span class="enum">${e.lotteryNum}</span>` +
-        `<span class="edate">${e.label}</span>`;
-      list.prepend(el);
-      setTimeout(() => el.classList.remove('new'), 600);
-      document.getElementById('right').scrollTop = 0;
-    }
-
-    function toggleAuto() {
-      if (autoInt) {
-        clearInterval(autoInt); autoInt = null;
-        document.getElementById('btnAuto').textContent = '⟳ Auto-Ziehung';
-        return;
-      }
-      if (nextIdx >= ALL.length) return;
-      document.getElementById('btnAuto').textContent = '◼ Stop';
-      autoInt = setInterval(() => {
-        if (nextIdx >= ALL.length || drawing) {
-          clearInterval(autoInt); autoInt = null;
-          document.getElementById('btnAuto').textContent = '⟳ Auto-Ziehung';
-          return;
-        }
-        drawOne();
-      }, 2000);
-    }
-
-    resetAll();
-  </script>
+  });
+</script>
 </body>
 </html>
